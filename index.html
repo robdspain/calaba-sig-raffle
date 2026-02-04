@@ -350,6 +350,43 @@
             margin-top: 6px;
         }
         
+        /* Urgency Banner */
+        .urgency-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 1px solid #fca5a5;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            animation: urgencyPulse 2s infinite;
+        }
+        
+        @keyframes urgencyPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2); }
+            50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        }
+        
+        .urgency-icon {
+            font-size: 20px;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        .urgency-text {
+            font-size: 13px;
+            color: #991b1b;
+        }
+        
+        .urgency-text strong {
+            color: #dc2626;
+        }
+        
         /* Ticket Options */
         .ticket-grid {
             display: grid;
@@ -678,6 +715,11 @@
             <div class="card-header">
                 <div class="card-icon">🎟️</div>
                 <h2>Get Raffle Tickets</h2>
+            </div>
+            
+            <div class="urgency-banner">
+                <span class="urgency-icon">🔥</span>
+                <span class="urgency-text"><strong>Limited tickets available!</strong> Only 100 raffle tickets will be sold — don't miss out!</span>
             </div>
             
             <div class="ticket-grid">
