@@ -590,6 +590,12 @@
             flex-direction: column;
             align-items: center;
             gap: 8px;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        
+        .footer-logo-item:hover {
+            transform: translateY(-3px);
         }
         
         .footer-logo-item img {
@@ -800,18 +806,18 @@
     <footer>
         <p class="footer-logo">CalABA SIGs</p>
         <div class="footer-logos">
-            <div class="footer-logo-item">
+            <a href="https://calaba.org" target="_blank" class="footer-logo-item">
                 <img src="calaba-logo.svg" alt="CalABA">
                 <span>CalABA</span>
-            </div>
-            <div class="footer-logo-item">
+            </a>
+            <a href="https://calaba.org/membership/special-interest-groups-sigs" target="_blank" class="footer-logo-item">
                 <img src="bae-sig-logo.png" alt="BAE SIG">
                 <span>BAE SIG</span>
-            </div>
-            <div class="footer-logo-item">
+            </a>
+            <a href="https://www.businessinbehavioranalysis.com" target="_blank" class="footer-logo-item">
                 <img src="biba-logo.png" alt="BIBA">
                 <span>BIBA</span>
-            </div>
+            </a>
         </div>
         <p style="margin-top: 24px;">A collaborative fundraiser benefiting all CalABA SIGs</p>
         <p style="font-size: 12px; margin-top: 8px;">Organized by the Behavior Analysts in Education SIG</p>
