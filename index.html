@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAE SIG Book Raffle - CalABA 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+        }
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .event-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .detail-item strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .prize {
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+        }
+        .prize h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .prize p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .prize .donor {
+            color: #667eea;
+            font-weight: 500;
+        }
+        .ticket-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .ticket-option {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+        .ticket-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        .ticket-option .amount {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+        .ticket-option .tickets {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .donate-btn {
+            display: block;
+            width: 100%;
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+        .donate-btn:hover {
+            background: #218838;
+        }
+        .rules {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .rules h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        .rules ul {
+            margin-left: 20px;
+            color: #856404;
+        }
+        .rules li {
+            margin-bottom: 8px;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: white;
+            opacity: 0.8;
+        }
+        footer a {
+            color: white;
+        }
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 BAE SIG Book Raffle</h1>
+            <p>Support the Behavior Analysts in Education Special Interest Group</p>
+        </header>
+
+        <div class="card">
+            <h2>🎉 CalABA 2026 SIG Reception</h2>
+            <div class="event-details">
+                <div class="detail-item">
+                    <strong>📅 Date</strong>
+                    Friday, March 6, 2026
+                </div>
+                <div class="detail-item">
+                    <strong>🕐 Time</strong>
+                    5:00 PM - 8:00 PM
+                </div>
+                <div class="detail-item">
+                    <strong>📍 Location</strong>
+                    Room 8, Sacramento
+                </div>
+                <div class="detail-item">
+                    <strong>🎟️ Drawing</strong>
+                    During Reception
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🏆 Prizes</h2>
+            
+            <div class="prize">
+                <h3>1-Hour Zoom Consultation</h3>
+                <p>Discuss data analyses, theory, findings, philosophy, or anything else!</p>
+                <p class="donor">Donated by Dr. Peter Killeen (ASU)</p>
+            </div>
+
+            <div class="prize">
+                <h3>"75 Social Games & Activities to Spark Engagement with Autistic Children"</h3>
+                <p>Brand new book on engaging activities for building social skills</p>
+                <p class="donor">Donated by Dr. Jamie Hughes-Lika</p>
+            </div>
+
+            <div class="prize">
+                <h3>Do Better Collective Gift Cards + Workbook</h3>
+                <p>Courses/membership access plus "The Do Better Guide Workshop Companion Guide"</p>
+                <p class="donor">Donated by Megan DeLeon Miller</p>
+            </div>
+
+            <p style="margin-top: 20px; color: #666; font-style: italic;">More prizes being added - check back soon!</p>
+        </div>
+
+        <div class="card">
+            <h2>🎟️ Get Your Raffle Tickets</h2>
+            <p>All proceeds support the CalABA Special Interest Group reception!</p>
+            
+            <div class="ticket-options">
+                <a href="VENMO_LINK_HERE?txn=pay&amount=5&note=BAE-SIG-Raffle-1-ticket" class="ticket-option">
+                    <span class="amount">$5</span>
+                    <span class="tickets">1 Ticket</span>
+                </a>
+                <a href="VENMO_LINK_HERE?txn=pay&amount=10&note=BAE-SIG-Raffle-3-tickets" class="ticket-option">
+                    <span class="amount">$10</span>
+                    <span class="tickets">3 Tickets</span>
+                </a>
+                <a href="VENMO_LINK_HERE?txn=pay&amount=20&note=BAE-SIG-Raffle-7-tickets" class="ticket-option">
+                    <span class="amount">$20</span>
+                    <span class="tickets">7 Tickets</span>
+                </a>
+            </div>
+
+            <a href="VENMO_LINK_HERE?txn=pay&note=BAE-SIG-Donation" class="donate-btn">
+                💚 Make a Direct Donation
+            </a>
+
+            <div class="rules">
+                <h3>⚠️ Important Rules</h3>
+                <ul>
+                    <li><strong>Must be present to win!</strong> You must be at the SIG Reception when your ticket number is called.</li>
+                    <li>Winners will be drawn during the reception on Friday, March 6th.</li>
+                    <li>Tickets can be purchased online or at the event.</li>
+                    <li>All proceeds support the CalABA Special Interest Groups.</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>Organized by the Behavior Analysts in Education Special Interest Group</p>
+            <p><a href="mailto:california.bae.sig@gmail.com">california.bae.sig@gmail.com</a></p>
+        </footer>
+    </div>
+</body>
+</html>
