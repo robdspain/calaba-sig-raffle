@@ -3,262 +3,461 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BAE SIG Book Raffle - CalABA 2026</title>
+    <title>Book Raffle | CalABA 2026 SIG Reception</title>
+    <meta name="description" content="Support the CalABA Special Interest Groups - Purchase raffle tickets for a chance to win books and consultations from featured speakers.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --text-primary: #1a1a1a;
+            --text-secondary: #525252;
+            --text-muted: #737373;
+            --bg-white: #ffffff;
+            --bg-gray: #f9fafb;
+            --border: #e5e5e5;
+            --accent: #0369a1;
+            --accent-hover: #0284c7;
+            --success: #16a34a;
+            --warning-bg: #fefce8;
+            --warning-border: #facc15;
+            --warning-text: #854d0e;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            color: var(--text-primary);
+            background: var(--bg-gray);
+            -webkit-font-smoothing: antialiased;
         }
+        
         .container {
-            max-width: 800px;
+            max-width: 720px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px 16px;
         }
+        
+        /* Header */
         header {
             text-align: center;
-            padding: 40px 20px;
-            color: white;
+            padding: 48px 24px 32px;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
         }
+        
+        .logo-text {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        
         header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
         }
+        
         header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
+            font-size: 16px;
+            color: var(--text-secondary);
         }
+        
+        /* Cards */
         .card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
         }
-        .card h2 {
-            color: #667eea;
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             margin-bottom: 20px;
-            font-size: 1.5rem;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
         }
-        .event-details {
+        
+        .card-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        /* Event Details */
+        .event-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
         }
-        .detail-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
+        
+        @media (min-width: 480px) {
+            .event-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        .event-item {
             text-align: center;
+            padding: 16px 12px;
+            background: var(--bg-gray);
+            border-radius: 8px;
         }
-        .detail-item strong {
-            display: block;
-            color: #667eea;
-            margin-bottom: 5px;
+        
+        .event-item .label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
         }
+        
+        .event-item .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        /* Prizes */
         .prize {
-            border-left: 4px solid #667eea;
-            padding: 15px 20px;
-            margin-bottom: 15px;
-            background: #f8f9fa;
-            border-radius: 0 8px 8px 0;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
         }
+        
+        .prize:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .prize:first-child {
+            padding-top: 0;
+        }
+        
         .prize h3 {
-            color: #333;
-            margin-bottom: 5px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
         }
-        .prize p {
-            color: #666;
-            font-size: 0.95rem;
+        
+        .prize .description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
         }
+        
         .prize .donor {
-            color: #667eea;
+            font-size: 13px;
+            color: var(--accent);
             font-weight: 500;
         }
-        .ticket-options {
+        
+        /* Ticket Options */
+        .ticket-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
         }
+        
         .ticket-option {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
+            display: block;
+            padding: 20px 12px;
+            background: var(--bg-gray);
+            border: 2px solid var(--border);
+            border-radius: 10px;
             text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
             text-decoration: none;
-            display: block;
+            color: inherit;
+            transition: all 0.15s ease;
         }
+        
         .ticket-option:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            border-color: var(--accent);
+            background: #f0f9ff;
         }
-        .ticket-option .amount {
-            font-size: 2rem;
-            font-weight: bold;
+        
+        .ticket-option .price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
             display: block;
         }
-        .ticket-option .tickets {
-            font-size: 0.9rem;
-            opacity: 0.9;
+        
+        .ticket-option .count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
         }
-        .donate-btn {
+        
+        .ticket-option .best-value {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--success);
+            margin-top: 6px;
+        }
+        
+        /* Buttons */
+        .btn-primary {
             display: block;
             width: 100%;
-            background: #28a745;
+            padding: 14px 24px;
+            background: var(--accent);
             color: white;
-            padding: 15px 30px;
-            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
             text-align: center;
             text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-top: 15px;
-            transition: background 0.2s;
-        }
-        .donate-btn:hover {
-            background: #218838;
-        }
-        .rules {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
             border-radius: 8px;
-            padding: 20px;
+            transition: background 0.15s ease;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn-secondary {
+            display: block;
+            width: 100%;
+            padding: 14px 24px;
+            background: var(--bg-white);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin-top: 12px;
+            transition: all 0.15s ease;
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--text-secondary);
+        }
+        
+        /* Rules */
+        .rules {
+            background: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            border-radius: 8px;
+            padding: 16px;
             margin-top: 20px;
         }
+        
         .rules h3 {
-            color: #856404;
-            margin-bottom: 10px;
-        }
-        .rules ul {
-            margin-left: 20px;
-            color: #856404;
-        }
-        .rules li {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--warning-text);
             margin-bottom: 8px;
         }
+        
+        .rules ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .rules li {
+            font-size: 13px;
+            color: var(--warning-text);
+            margin-bottom: 4px;
+        }
+        
+        .rules li:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Footer */
         footer {
             text-align: center;
-            padding: 30px;
-            color: white;
-            opacity: 0.8;
+            padding: 32px 16px;
+            color: var(--text-muted);
+            font-size: 13px;
         }
+        
         footer a {
-            color: white;
+            color: var(--text-secondary);
+            text-decoration: none;
         }
-        @media (max-width: 600px) {
-            header h1 {
-                font-size: 1.8rem;
-            }
-            .card {
-                padding: 20px;
-            }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* More prizes note */
+        .more-prizes {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg-gray);
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📚 BAE SIG Book Raffle</h1>
-            <p>Support the Behavior Analysts in Education Special Interest Group</p>
-        </header>
+    <header>
+        <div class="logo-text">CalABA 2026</div>
+        <h1>SIG Reception Book Raffle</h1>
+        <p>Support the Special Interest Groups</p>
+    </header>
 
+    <div class="container">
         <div class="card">
-            <h2>🎉 CalABA 2026 SIG Reception</h2>
-            <div class="event-details">
-                <div class="detail-item">
-                    <strong>📅 Date</strong>
-                    Friday, March 6, 2026
+            <div class="card-header">
+                <h2>Event Details</h2>
+            </div>
+            <div class="event-grid">
+                <div class="event-item">
+                    <div class="label">Date</div>
+                    <div class="value">March 6</div>
                 </div>
-                <div class="detail-item">
-                    <strong>🕐 Time</strong>
-                    5:00 PM - 8:00 PM
+                <div class="event-item">
+                    <div class="label">Time</div>
+                    <div class="value">5–8 PM</div>
                 </div>
-                <div class="detail-item">
-                    <strong>📍 Location</strong>
-                    Room 8, Sacramento
+                <div class="event-item">
+                    <div class="label">Location</div>
+                    <div class="value">Room 8</div>
                 </div>
-                <div class="detail-item">
-                    <strong>🎟️ Drawing</strong>
-                    During Reception
+                <div class="event-item">
+                    <div class="label">Drawing</div>
+                    <div class="value">7:30 PM</div>
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <h2>🏆 Prizes</h2>
+            <div class="card-header">
+                <h2>Prizes</h2>
+            </div>
             
             <div class="prize">
                 <h3>1-Hour Zoom Consultation</h3>
-                <p>Discuss data analyses, theory, findings, philosophy, or anything else!</p>
-                <p class="donor">Donated by Dr. Peter Killeen (ASU)</p>
+                <p class="description">Discuss data analysis, theory, research findings, or philosophy with a leading researcher</p>
+                <p class="donor">Donated by Dr. Peter Killeen, Arizona State University</p>
             </div>
 
             <div class="prize">
-                <h3>"75 Social Games & Activities to Spark Engagement with Autistic Children"</h3>
-                <p>Brand new book on engaging activities for building social skills</p>
+                <h3>75 Social Games & Activities to Spark Engagement</h3>
+                <p class="description">New release on building social skills with autistic children through play</p>
                 <p class="donor">Donated by Dr. Jamie Hughes-Lika</p>
             </div>
 
             <div class="prize">
-                <h3>Do Better Collective Gift Cards + Workbook</h3>
-                <p>Courses/membership access plus "The Do Better Guide Workshop Companion Guide"</p>
+                <h3>Do Better Collective Bundle</h3>
+                <p class="description">Course gift cards plus The Do Better Guide Workshop Companion workbook</p>
                 <p class="donor">Donated by Megan DeLeon Miller</p>
             </div>
-
-            <p style="margin-top: 20px; color: #666; font-style: italic;">More prizes being added - check back soon!</p>
+            
+            <div class="more-prizes">
+                More prizes being added — check back before the conference!
+            </div>
         </div>
 
         <div class="card">
-            <h2>🎟️ Get Your Raffle Tickets</h2>
-            <p>All proceeds support the CalABA Special Interest Group reception!</p>
+            <div class="card-header">
+                <h2>Get Raffle Tickets</h2>
+            </div>
             
-            <div class="ticket-options">
-                <a href="VENMO_LINK_HERE?txn=pay&amount=5&note=BAE-SIG-Raffle-1-ticket" class="ticket-option">
-                    <span class="amount">$5</span>
-                    <span class="tickets">1 Ticket</span>
+            <div class="ticket-grid">
+                <a href="#" class="ticket-option" id="ticket-1">
+                    <span class="price">$10</span>
+                    <span class="count">1 ticket</span>
                 </a>
-                <a href="VENMO_LINK_HERE?txn=pay&amount=10&note=BAE-SIG-Raffle-3-tickets" class="ticket-option">
-                    <span class="amount">$10</span>
-                    <span class="tickets">3 Tickets</span>
+                <a href="#" class="ticket-option" id="ticket-3">
+                    <span class="price">$25</span>
+                    <span class="count">3 tickets</span>
                 </a>
-                <a href="VENMO_LINK_HERE?txn=pay&amount=20&note=BAE-SIG-Raffle-7-tickets" class="ticket-option">
-                    <span class="amount">$20</span>
-                    <span class="tickets">7 Tickets</span>
+                <a href="#" class="ticket-option" id="ticket-7">
+                    <span class="price">$40</span>
+                    <span class="count">7 tickets</span>
+                    <span class="best-value">Best Value</span>
                 </a>
             </div>
 
-            <a href="VENMO_LINK_HERE?txn=pay&note=BAE-SIG-Donation" class="donate-btn">
-                💚 Make a Direct Donation
+            <a href="#" class="btn-primary" id="buy-btn">
+                Buy Tickets via Venmo
+            </a>
+            
+            <a href="#" class="btn-secondary" id="donate-btn">
+                Make a Direct Donation
             </a>
 
             <div class="rules">
-                <h3>⚠️ Important Rules</h3>
+                <h3>Important: Must Be Present to Win</h3>
                 <ul>
-                    <li><strong>Must be present to win!</strong> You must be at the SIG Reception when your ticket number is called.</li>
-                    <li>Winners will be drawn during the reception on Friday, March 6th.</li>
-                    <li>Tickets can be purchased online or at the event.</li>
-                    <li>All proceeds support the CalABA Special Interest Groups.</li>
+                    <li>Winners must be at the SIG Reception when their ticket is drawn</li>
+                    <li>Drawing begins at approximately 7:30 PM</li>
+                    <li>Tickets also available at the door</li>
                 </ul>
             </div>
         </div>
-
-        <footer>
-            <p>Organized by the Behavior Analysts in Education Special Interest Group</p>
-            <p><a href="mailto:california.bae.sig@gmail.com">california.bae.sig@gmail.com</a></p>
-        </footer>
     </div>
+
+    <footer>
+        <p>Organized by the Behavior Analysts in Education Special Interest Group</p>
+        <p><a href="mailto:california.bae.sig@gmail.com">california.bae.sig@gmail.com</a></p>
+    </footer>
+
+    <script>
+        // Venmo configuration - UPDATE THIS
+        const VENMO_USERNAME = 'CalABA'; // Replace with actual Venmo username
+        
+        function openVenmo(amount, note) {
+            // Try Venmo deep link first (works on mobile)
+            const venmoUrl = `venmo://paycharge?txn=pay&recipients=${VENMO_USERNAME}&amount=${amount}&note=${encodeURIComponent(note)}`;
+            const webUrl = `https://venmo.com/${VENMO_USERNAME}?txn=pay&amount=${amount}&note=${encodeURIComponent(note)}`;
+            
+            // Attempt deep link, fall back to web
+            window.location.href = venmoUrl;
+            setTimeout(() => {
+                window.location.href = webUrl;
+            }, 500);
+        }
+        
+        document.getElementById('ticket-1').addEventListener('click', (e) => {
+            e.preventDefault();
+            openVenmo(10, 'BAE SIG Raffle - 1 Ticket');
+        });
+        
+        document.getElementById('ticket-3').addEventListener('click', (e) => {
+            e.preventDefault();
+            openVenmo(25, 'BAE SIG Raffle - 3 Tickets');
+        });
+        
+        document.getElementById('ticket-7').addEventListener('click', (e) => {
+            e.preventDefault();
+            openVenmo(40, 'BAE SIG Raffle - 7 Tickets');
+        });
+        
+        document.getElementById('buy-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            openVenmo(40, 'BAE SIG Raffle - 7 Tickets');
+        });
+        
+        document.getElementById('donate-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            openVenmo('', 'BAE SIG Donation');
+        });
+    </script>
 </body>
 </html>
