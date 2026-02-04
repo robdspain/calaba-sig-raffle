@@ -135,7 +135,9 @@
         
         /* Prizes */
         .prize {
-            padding: 16px 0;
+            display: flex;
+            gap: 16px;
+            padding: 20px 0;
             border-bottom: 1px solid var(--border);
         }
         
@@ -148,23 +150,61 @@
             padding-top: 0;
         }
         
+        .prize-image {
+            flex-shrink: 0;
+            width: 80px;
+            height: 100px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: var(--bg-gray);
+            border: 1px solid var(--border);
+        }
+        
+        .prize-icon {
+            flex-shrink: 0;
+            width: 80px;
+            height: 100px;
+            border-radius: 6px;
+            background: var(--bg-gray);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+        
+        .prize-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
         .prize h3 {
             font-size: 15px;
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-        
-        .prize .description {
-            font-size: 14px;
-            color: var(--text-secondary);
             margin-bottom: 6px;
         }
         
-        .prize .donor {
+        .prize .description {
             font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .prize .donor {
+            font-size: 12px;
             color: var(--accent);
             font-weight: 500;
+        }
+        
+        .prize .value {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--success);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-top: 4px;
         }
         
         /* Ticket Options */
@@ -351,21 +391,33 @@
             </div>
             
             <div class="prize">
-                <h3>1-Hour Zoom Consultation</h3>
-                <p class="description">Discuss data analysis, theory, research findings, or philosophy with a leading researcher</p>
-                <p class="donor">Donated by Dr. Peter Killeen, Arizona State University</p>
+                <div class="prize-icon">🎓</div>
+                <div class="prize-content">
+                    <h3>1-Hour Private Zoom Consultation</h3>
+                    <p class="description">One-on-one session with renowned behavioral scientist Dr. Peter Killeen. Discuss data analysis, behavioral theory, your research findings, philosophy of science, or anything else on your mind.</p>
+                    <p class="donor">Donated by Dr. Peter Killeen, Arizona State University</p>
+                    <p class="value">Value: $200+</p>
+                </div>
             </div>
 
             <div class="prize">
-                <h3>75 Social Games & Activities to Spark Engagement</h3>
-                <p class="description">New release on building social skills with autistic children through play</p>
-                <p class="donor">Donated by Dr. Jamie Hughes-Lika</p>
+                <img src="https://assets.lulu.com/cover_thumbs/e/7/e7j26ek-front-shortedge-384.jpg" alt="75 Social Games book cover" class="prize-image">
+                <div class="prize-content">
+                    <h3>75 Social Games & Activities to Spark Engagement with Autistic Children</h3>
+                    <p class="description">Brand new release! Interactive, toy-free social routines that create powerful learning moments. Covers orienting, eye gaze, imitation, turn-taking, and building foundational communication skills through play.</p>
+                    <p class="donor">Donated by Dr. Jamie Hughes-Lika, Sage Learning Systems</p>
+                    <p class="value">Value: $25</p>
+                </div>
             </div>
 
             <div class="prize">
-                <h3>Do Better Collective Bundle</h3>
-                <p class="description">Course gift cards plus The Do Better Guide Workshop Companion workbook</p>
-                <p class="donor">Donated by Megan DeLeon Miller</p>
+                <div class="prize-icon">📚</div>
+                <div class="prize-content">
+                    <h3>Do Better Collective Bundle</h3>
+                    <p class="description">Gift cards for courses and membership on Do Better Collective, PLUS "The Do Better Guide Workshop Companion" workbook with training content, screeners, implementation checklists, and case study exercises.</p>
+                    <p class="donor">Donated by Megan DeLeon Miller, Do Better Collective</p>
+                    <p class="value">Value: $75+</p>
+                </div>
             </div>
             
             <div class="more-prizes">
