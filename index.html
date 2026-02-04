@@ -65,6 +65,17 @@
             margin: 0 auto;
         }
         
+        .logo-row {
+            margin-bottom: 20px;
+        }
+        
+        .hero-logo {
+            height: 80px;
+            width: auto;
+            filter: brightness(0) invert(1);
+            opacity: 0.95;
+        }
+        
         .badge {
             display: inline-block;
             background: rgba(255,255,255,0.15);
@@ -576,6 +587,13 @@
             text-decoration: underline;
         }
         
+        .footer-logo-img {
+            height: 50px;
+            width: auto;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+        
         .footer-logo {
             font-weight: 700;
             color: var(--calaba-blue);
@@ -609,9 +627,12 @@
     
     <div class="hero">
         <div class="hero-content">
-            <div class="badge">🎟️ CalABA 2026</div>
+            <div class="logo-row">
+                <img src="calaba-logo.svg" alt="CalABA" class="hero-logo">
+            </div>
+            <div class="badge">🎟️ CalABA 2026 Conference</div>
             <h1>SIG Reception Book Raffle</h1>
-            <p>Win books, consultations & more from CalABA speakers!</p>
+            <p>Win books, consultations & more from CalABA speakers!<br><em>Proceeds benefit all CalABA Special Interest Groups</em></p>
             
             <div class="countdown" id="countdown">
                 <div class="countdown-item">
@@ -762,8 +783,10 @@
     </div>
 
     <footer>
+        <img src="calaba-logo.svg" alt="CalABA" class="footer-logo-img">
         <p class="footer-logo">CalABA Special Interest Groups</p>
-        <p>Organized by the Behavior Analysts in Education SIG</p>
+        <p>A collaborative fundraiser benefiting all CalABA SIGs</p>
+        <p style="font-size: 12px; margin-top: 8px;">Organized by the Behavior Analysts in Education SIG</p>
         <p><a href="mailto:california.bae.sig@gmail.com">california.bae.sig@gmail.com</a></p>
     </footer>
 
