@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Raffle | CalABA 2026</title>
-    <meta name="description" content="Support the CalABA Special Interest Groups - Purchase raffle tickets for a chance to win books and consultations from featured speakers.">
+    <meta name="description" content="Win books, consultations & more from CalABA speakers! Purchase raffle tickets to support CalABA. March 5-7, 2026, Sacramento.">
+    <meta property="og:title" content="CalABA 2026 Book Raffle 🎟️">
+    <meta property="og:description" content="Win prizes from Dr. Peter Killeen, Do Better Collective, OBM Practitioner & more! Tickets from $10. Must be present to win.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://calaba-sig-raffle.vercel.app">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CalABA 2026 Book Raffle">
+    <meta name="twitter:description" content="Win prizes from CalABA speakers! Tickets from $10. March 5-7, Sacramento.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -700,9 +707,9 @@
                 Help Support CalABA 🎉
             </p>
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 0%"></div>
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
             </div>
-            <p class="progress-text">Every ticket helps us reach our goal! 🎉</p>
+            <p class="progress-text" id="progress-text">Every ticket helps us reach our goal! 🎉</p>
         </div>
 
         <div class="card">
@@ -1170,6 +1177,7 @@
             window.open(paypalUrl, '_blank');
             
             showConfirmation(buyer.name, buyer.email, ticketCount, amount);
+            updateProgress();
             createConfetti();
         }
         
@@ -1272,6 +1280,23 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         });
+        
+        // Update progress bar from localStorage donations
+        function updateProgress() {
+            const GOAL = 500; // $500 fundraising goal
+            const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
+            const total = donations.reduce((sum, d) => {
+                const amt = parseFloat(d.amount);
+                return sum + (isNaN(amt) ? 0 : amt);
+            }, 0);
+            const pct = Math.min(100, Math.round((total / GOAL) * 100));
+            document.getElementById('progress-fill').style.width = pct + '%';
+            if (total > 0) {
+                document.getElementById('progress-text').innerHTML = 
+                    `<strong>$${total}</strong> raised of $${GOAL} goal (${pct}%) — ${donations.length} ticket purchase${donations.length !== 1 ? 's' : ''} 🎉`;
+            }
+        }
+        updateProgress();
     </script>
 </body>
 </html>
