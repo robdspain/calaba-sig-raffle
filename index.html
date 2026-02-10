@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Raffle | CalABA 2026</title>
     <meta name="description" content="Support the CalABA Special Interest Groups - Purchase raffle tickets for a chance to win books and consultations from featured speakers.">
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -949,12 +948,7 @@
         // Google Sheets webhook for donation logging
         const SHEETS_WEBHOOK = ''; // Will be set when Google Sheet is created
         
-        // EmailJS configuration (free: 200 emails/month)
-        // Sign up at https://www.emailjs.com — connect Gmail, create template
-        const EMAILJS_PUBLIC_KEY = ''; // Your EmailJS public key
-        const EMAILJS_SERVICE_ID = ''; // e.g. 'service_xxxxx'  
-        const EMAILJS_TEMPLATE_ID = ''; // e.g. 'template_xxxxx'
-        if (EMAILJS_PUBLIC_KEY) { emailjs.init(EMAILJS_PUBLIC_KEY); }
+        // Email sending via serverless function (Gmail)
         
         function validateBuyer() {
             const name = document.getElementById('buyer-name').value.trim();
@@ -1136,29 +1130,31 @@
                 link.click();
             };
             
-            // Auto-email ticket via EmailJS
-            if (EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
-                const canvas = document.getElementById('ticket-canvas');
-                const ticketImage = canvas.toDataURL('image/png');
-                
-                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            // Auto-email ticket via Gmail serverless function
+            const canvas = document.getElementById('ticket-canvas');
+            const ticketImage = canvas.toDataURL('image/png');
+            
+            fetch('/api/send-ticket', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     to_name: name,
                     to_email: email,
                     ticket_count: ticketCount,
-                    amount: '$' + amount,
-                    ticket_ids: ticketIds.join(', '),
+                    amount: amount,
+                    ticket_ids: ticketIds,
                     ticket_image: ticketImage
-                }).then(() => {
+                })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
                     document.getElementById('email-status').style.display = 'block';
                     document.getElementById('email-error').style.display = 'none';
-                }).catch(() => {
+                } else {
                     document.getElementById('email-error').style.display = 'block';
-                    document.getElementById('email-status').style.display = 'none';
-                });
-            } else {
-                // No EmailJS configured — prompt download
+                }
+            }).catch(() => {
                 document.getElementById('email-error').style.display = 'block';
-            }
+            });
         }
         
         function purchaseTickets(amount, ticketCount, note) {

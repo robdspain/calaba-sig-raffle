@@ -55,7 +55,8 @@
             <div class="email-body" id="email-preview"></div>
         </div>
         <div style="margin-top: 16px;">
-            <button class="btn btn-primary" id="send-mailto">📧 Open in Email App</button>
+            <button class="btn btn-primary" id="send-email">📧 Send via Gmail</button>
+            <button class="btn btn-secondary" id="send-mailto">📧 Open in Mail App</button>
             <button class="btn btn-secondary" id="download-cert">📥 Download Certificate</button>
         </div>
         <div id="status"></div>
@@ -210,6 +211,42 @@
             ctx.font = '11px Inter, sans-serif';
             ctx.fillText('Issued: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), w / 2, h - 22);
         }
+
+        // Send certificate via Gmail API
+        document.getElementById('send-email').onclick = async () => {
+            const name = document.getElementById('winner-name').value.trim();
+            const email = document.getElementById('winner-email').value.trim();
+            if (!name || !email || !selectedPrize) { alert('Fill in all fields and select a prize.'); return; }
+            
+            const canvas = document.getElementById('cert-canvas');
+            const certImage = canvas.toDataURL('image/png');
+            
+            document.getElementById('status').innerHTML = '<div class="status" style="background:#1e3a5f;color:#7dd3fc;">⏳ Sending...</div>';
+            
+            try {
+                const res = await fetch('/api/send-ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to_name: name,
+                        to_email: email,
+                        ticket_image: certImage,
+                        type: 'certificate',
+                        prize_name: selectedPrize.name,
+                        prize_donor: selectedPrize.donor,
+                        prize_value: selectedPrize.value
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('status').innerHTML = '<div class="status success">✅ Certificate emailed to ' + email + '</div>';
+                } else {
+                    document.getElementById('status').innerHTML = '<div class="status error">❌ ' + (data.error || 'Failed') + '</div>';
+                }
+            } catch (e) {
+                document.getElementById('status').innerHTML = '<div class="status error">❌ Network error</div>';
+            }
+        };
 
         // Download certificate
         document.getElementById('download-cert').onclick = () => {
