@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raffle Admin — CalABA 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 20px; }
+        .container { max-width: 700px; margin: 0 auto; }
+        h1 { font-size: 24px; margin-bottom: 8px; color: #f59e0b; }
+        h2 { font-size: 18px; margin: 24px 0 12px; color: #0891b2; }
+        p.sub { font-size: 14px; color: #94a3b8; margin-bottom: 24px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #94a3b8; }
+        input, select, textarea { width: 100%; padding: 10px 14px; border: 1px solid #334155; border-radius: 8px; background: #1e293b; color: #f1f5f9; font-size: 15px; margin-bottom: 14px; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #0891b2; }
+        select { cursor: pointer; }
+        .btn { display: inline-block; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; border: none; text-decoration: none; }
+        .btn-primary { background: linear-gradient(135deg, #0891b2, #06b6d4); color: white; }
+        .btn-secondary { background: #334155; color: #e2e8f0; margin-left: 8px; }
+        .btn:hover { opacity: 0.9; }
+        .prize-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+        .prize-card:hover, .prize-card.selected { border-color: #f59e0b; background: #1e293b; }
+        .prize-card.selected { box-shadow: 0 0 0 2px #f59e0b; }
+        .prize-card h3 { font-size: 15px; color: #f1f5f9; }
+        .prize-card .donor { font-size: 13px; color: #94a3b8; }
+        .preview { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin: 16px 0; }
+        .preview h3 { color: #f59e0b; margin-bottom: 12px; }
+        .preview .email-body { white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #cbd5e1; }
+        .status { padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-size: 14px; }
+        .status.success { background: #064e3b; color: #6ee7b7; }
+        .status.error { background: #7f1d1d; color: #fca5a5; }
+        canvas { max-width: 100%; border-radius: 12px; margin: 12px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎟️ Raffle Admin</h1>
+        <p class="sub">Email certificates to raffle winners — CalABA 2026</p>
+
+        <h2>1. Select Prize</h2>
+        <div id="prizes"></div>
+
+        <h2>2. Winner Info</h2>
+        <label>Winner's Full Name</label>
+        <input type="text" id="winner-name" placeholder="Jane Smith">
+        <label>Winner's Email</label>
+        <input type="email" id="winner-email" placeholder="jane@example.com">
+
+        <h2>3. Preview & Send</h2>
+        <canvas id="cert-canvas"></canvas>
+        <div id="preview" class="preview" style="display:none;">
+            <h3>📧 Email Preview</h3>
+            <div class="email-body" id="email-preview"></div>
+        </div>
+        <div style="margin-top: 16px;">
+            <button class="btn btn-primary" id="send-mailto">📧 Open in Email App</button>
+            <button class="btn btn-secondary" id="download-cert">📥 Download Certificate</button>
+        </div>
+        <div id="status"></div>
+
+        <h2 style="margin-top: 40px;">📋 Donation Log</h2>
+        <p class="sub">Donations stored in this browser's localStorage</p>
+        <button class="btn btn-secondary" onclick="exportDonations()" style="margin-bottom: 12px;">📥 Export CSV</button>
+        <div id="donation-log" style="font-size: 13px; color: #94a3b8;"></div>
+    </div>
+
+    <script>
+        const PRIZES = [
+            { id: 'killeen', name: '1-Hour Private Zoom Consultation', donor: 'Dr. Peter Killeen, Arizona State University', value: 'Priceless' },
+            { id: 'hughes', name: '75 Social Games & Activities Book', donor: 'Dr. Jamie Hughes-Lika, Sage Learning Systems', value: 'Book' },
+            { id: 'dobetter', name: 'Do Better Collective Bundle', donor: 'Megan DeLeon Miller, Do Better Collective', value: 'Course + Membership + Workbook' },
+            { id: 'efl', name: 'Essential for Living User Manuals (3 copies)', donor: 'Reginald Ponio, BABAC', value: '3 User Manuals' },
+            { id: 'sbt', name: 'SBT Guidebook & Workbook + PFA/SBT Swag', donor: 'Nicola Schneider, NRS Compassionate Behavior Services', value: 'Guidebook + Swag Bundle' },
+            { id: 'obm', name: 'Free Entry to OBM Practitioner Program', donor: 'Mellanie Page, OBM Practitioner', value: 'Full Program Access' },
+            { id: 'abacc', name: '1 Free BACB CEU — ABACC Workshop', donor: 'Caroly Shumway, Ph.D., ABA Climate Coalition', value: '1 BACB CEU' },
+            { id: 'bst', name: '6-Month Behavior Study Tools Subscription', donor: 'BehaviorStudyTools / Rob Spain', value: '$180 (6 × $29.99/mo)' },
+        ];
+
+        let selectedPrize = null;
+
+        // Render prize cards
+        const prizesEl = document.getElementById('prizes');
+        PRIZES.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'prize-card';
+            card.innerHTML = `<h3>${p.name}</h3><div class="donor">${p.donor} — ${p.value}</div>`;
+            card.onclick = () => {
+                document.querySelectorAll('.prize-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedPrize = p;
+                updatePreview();
+            };
+            prizesEl.appendChild(card);
+        });
+
+        function updatePreview() {
+            const name = document.getElementById('winner-name').value.trim() || '[Winner Name]';
+            const email = document.getElementById('winner-email').value.trim() || '[email]';
+            const prize = selectedPrize || { name: '[Select a prize]', donor: '', value: '' };
+
+            // Generate certificate image
+            generateCertificate(name, prize);
+
+            const body = `Congratulations, ${name}! 🎉\n\nYou've won a prize at the CalABA 2026 Conference Raffle!\n\n🏆 Prize: ${prize.name}\n🎁 Donated by: ${prize.donor}\n💎 Value: ${prize.value}\n\nPlease see the attached certificate. If your prize requires coordination with the donor, we'll connect you shortly.\n\nThank you for supporting CalABA!\n\n— CalABA 2026 Raffle Team`;
+
+            document.getElementById('email-preview').textContent = body;
+            document.getElementById('preview').style.display = 'block';
+
+            // Set up mailto
+            document.getElementById('send-mailto').onclick = () => {
+                const subject = encodeURIComponent(`🎉 You Won! CalABA 2026 Raffle — ${prize.name}`);
+                const mailBody = encodeURIComponent(body);
+                window.open(`mailto:${email}?subject=${subject}&body=${mailBody}`);
+            };
+        }
+
+        function generateCertificate(name, prize) {
+            const canvas = document.getElementById('cert-canvas');
+            const ctx = canvas.getContext('2d');
+            const w = 900, h = 500;
+            canvas.width = w;
+            canvas.height = h;
+
+            // Background
+            const grad = ctx.createLinearGradient(0, 0, w, h);
+            grad.addColorStop(0, '#1e3a5f');
+            grad.addColorStop(0.5, '#0f2847');
+            grad.addColorStop(1, '#0891b2');
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.roundRect(0, 0, w, h, 20); ctx.fill();
+
+            // Gold border
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(15, 15, w - 30, h - 30, 14); ctx.stroke();
+            ctx.strokeStyle = 'rgba(245,158,11,0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(25, 25, w - 50, h - 50, 10); ctx.stroke();
+
+            // Decorative corners
+            ctx.globalAlpha = 0.06;
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath(); ctx.arc(0, 0, 200, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(w, h, 200, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Header
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = '600 14px Inter, sans-serif';
+            ctx.fillText('✨  CalABA 2026 CONFERENCE  ✨', w / 2, 65);
+
+            // Title
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 40px Inter, sans-serif';
+            ctx.fillText('WINNER CERTIFICATE', w / 2, 120);
+
+            // Gold divider
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(w / 2 - 80, 135, 160, 3);
+
+            // "Awarded to"
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.font = '15px Inter, sans-serif';
+            ctx.fillText('Awarded to', w / 2, 180);
+
+            // Winner name
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = 'bold 34px Inter, sans-serif';
+            const dName = name.length > 30 ? name.substring(0, 28) + '…' : name;
+            ctx.fillText(dName, w / 2, 220);
+
+            // Prize section
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.font = '14px Inter, sans-serif';
+            ctx.fillText('for winning', w / 2, 265);
+
+            // Prize name (wrap if long)
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px Inter, sans-serif';
+            const pName = prize.name.length > 45 ? prize.name.substring(0, 43) + '…' : prize.name;
+            ctx.fillText(pName, w / 2, 300);
+
+            // Donor
+            if (prize.donor) {
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.font = '14px Inter, sans-serif';
+                ctx.fillText('Generously donated by ' + prize.donor, w / 2, 335);
+            }
+
+            // Value badge
+            if (prize.value) {
+                ctx.fillStyle = 'rgba(245,158,11,0.15)';
+                const vw = ctx.measureText(prize.value).width + 40;
+                ctx.beginPath(); ctx.roundRect(w / 2 - vw / 2, 355, vw, 32, 16); ctx.fill();
+                ctx.fillStyle = '#f59e0b';
+                ctx.font = '600 14px Inter, sans-serif';
+                ctx.fillText('🎁 ' + prize.value, w / 2, 376);
+            }
+
+            // Footer
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '12px Inter, sans-serif';
+            ctx.fillText('March 5-7, 2026 • Sacramento Convention Center • calaba.org', w / 2, h - 40);
+
+            // Date
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.font = '11px Inter, sans-serif';
+            ctx.fillText('Issued: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), w / 2, h - 22);
+        }
+
+        // Download certificate
+        document.getElementById('download-cert').onclick = () => {
+            const canvas = document.getElementById('cert-canvas');
+            const name = document.getElementById('winner-name').value.trim() || 'winner';
+            const link = document.createElement('a');
+            link.download = `calaba-2026-certificate-${name.replace(/\s+/g, '-').toLowerCase()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        };
+
+        // Live preview on input
+        document.getElementById('winner-name').addEventListener('input', updatePreview);
+        document.getElementById('winner-email').addEventListener('input', updatePreview);
+
+        // Donation log viewer
+        function showDonationLog() {
+            const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
+            const el = document.getElementById('donation-log');
+            if (!donations.length) { el.textContent = 'No donations logged in this browser.'; return; }
+            el.innerHTML = donations.reverse().map(d => 
+                `<div style="padding:8px 0;border-bottom:1px solid #334155;">
+                    <strong>${d.name}</strong> — ${d.email}<br>
+                    ${d.tickets} ticket(s) • $${d.amount} • ${d.method} • ${new Date(d.timestamp).toLocaleString()}<br>
+                    <span style="font-family:monospace;font-size:11px;color:#64748b;">${d.id}</span>
+                </div>`
+            ).join('');
+        }
+        showDonationLog();
+
+        function exportDonations() {
+            const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
+            if (!donations.length) { alert('No donations logged.'); return; }
+            const csv = 'Timestamp,Name,Email,Amount,Tickets,Method,ID\n' +
+                donations.map(d => `${d.timestamp},"${d.name}","${d.email}",${d.amount},${d.tickets},${d.method},${d.id}`).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'calaba-raffle-donations.csv';
+            a.click();
+        }
+    </script>
+</body>
+</html>

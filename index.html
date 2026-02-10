@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Raffle | CalABA 2026 SIG Reception</title>
+    <title>Book Raffle | CalABA 2026</title>
     <meta name="description" content="Support the CalABA Special Interest Groups - Purchase raffle tickets for a chance to win books and consultations from featured speakers.">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -670,8 +671,8 @@
     <div class="hero">
         <div class="hero-content">
             <div class="badge">🎟️ CalABA 2026 Conference</div>
-            <h1>SIG Reception Book Raffle</h1>
-            <p>Win books, consultations & more from CalABA speakers!<br><em>Proceeds benefit all CalABA Special Interest Groups</em></p>
+            <h1>CalABA 2026 Book Raffle</h1>
+            <p>Win books, consultations & more from CalABA speakers!<br><em>Proceeds benefit CalABA</em></p>
             
             <div class="countdown" id="countdown">
                 <div class="countdown-item">
@@ -697,7 +698,7 @@
     <div class="container">
         <div class="progress-section">
             <p class="progress-label">
-                Help Support CalABA SIGs
+                Help Support CalABA 🎉
             </p>
             <div class="progress-bar">
                 <div class="progress-fill" style="width: 0%"></div>
@@ -864,7 +865,7 @@
 
                 <button class="btn-primary pulse" id="buy-btn">
                     <span>🎟️</span>
-                    <span>Buy Tickets via Venmo</span>
+                    <span>Buy Tickets via PayPal</span>
                 </button>
                 
                 <a href="#" class="btn-secondary" id="donate-btn">
@@ -872,14 +873,21 @@
                 </a>
             </div>
 
-            <!-- Step 2: Confirmation after redirect -->
+            <!-- Step 2: Confirmation with generated ticket -->
             <div id="ticket-step-confirm" style="display: none; text-align: center; padding: 20px 0;">
-                <div style="font-size: 48px; margin-bottom: 12px;">✅</div>
-                <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Thanks, <span id="confirm-name"></span>!</h3>
-                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">Your ticket purchase has been logged. Complete your payment via Venmo if you haven't already.</p>
-                <p style="font-size: 13px; color: var(--text-muted);">A confirmation will be sent to <strong id="confirm-email"></strong></p>
-                <button onclick="document.getElementById('ticket-step-info').style.display='block'; document.getElementById('ticket-step-confirm').style.display='none';" 
-                    class="btn-secondary" style="margin-top: 16px;">← Buy More Tickets</button>
+                <div style="font-size: 48px; margin-bottom: 12px;">🎟️</div>
+                <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Your Tickets, <span id="confirm-name"></span>!</h3>
+                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">Complete your payment via PayPal if you haven't already.</p>
+                <canvas id="ticket-canvas" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin: 16px 0;"></canvas>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px;">
+                    <button id="download-ticket-btn" class="btn-primary" style="font-size: 14px; padding: 10px 20px;">
+                        📥 Download Ticket
+                    </button>
+                    <button onclick="document.getElementById('ticket-step-info').style.display='block'; document.getElementById('ticket-step-confirm').style.display='none';" 
+                        class="btn-secondary" style="font-size: 14px; padding: 10px 20px;">← Buy More</button>
+                </div>
+                <p id="email-status" style="font-size: 13px; color: var(--success); margin-top: 12px; display: none;">✅ Ticket emailed to <strong id="confirm-email"></strong></p>
+                <p id="email-error" style="font-size: 13px; color: #ef4444; margin-top: 12px; display: none;">📧 Email delivery pending — download your ticket above as backup</p>
             </div>
 
             <div class="rules">
@@ -895,15 +903,15 @@
     </div>
 
     <footer>
-        <p class="footer-logo">CalABA SIGs</p>
+        <p class="footer-logo">CalABA</p>
         <div class="footer-logos">
             <a href="https://calaba.org" target="_blank" class="footer-logo-item">
                 <img src="calaba-logo.svg" alt="CalABA">
                 <span>CalABA</span>
             </a>
-            <a href="https://calaba.org/membership/special-interest-groups-sigs" target="_blank" class="footer-logo-item">
-                <img src="bae-sig-logo.png" alt="BAE SIG">
-                <span>BAE SIG</span>
+            <a href="https://calaba.org" target="_blank" class="footer-logo-item">
+                <img src="calaba-logo.png" alt="CalABA" onerror="this.style.display='none'">
+                <span>CalABA</span>
             </a>
             <a href="https://www.businessinbehavioranalysis.com" target="_blank" class="footer-logo-item">
                 <img src="biba-logo.png" alt="BIBA">
@@ -914,9 +922,8 @@
                 <span>BABAC</span>
             </a>
         </div>
-        <p style="margin-top: 24px;">A collaborative fundraiser benefiting all CalABA SIGs</p>
-        <p style="font-size: 12px; margin-top: 8px;">Organized by the Behavior Analysts in Education SIG</p>
-        <p><a href="mailto:california.bae.sig@gmail.com">california.bae.sig@gmail.com</a></p>
+        <p style="margin-top: 24px;">A collaborative fundraiser benefiting CalABA</p>
+        <p><a href="https://calaba.org">calaba.org</a></p>
     </footer>
 
     <script>
@@ -941,11 +948,18 @@
         updateCountdown();
         setInterval(updateCountdown, 1000);
         
-        // Venmo configuration
-        const VENMO_USERNAME = 'CalABA';
+        // PayPal configuration
+        const PAYPAL_LINK = 'https://www.paypal.com/donate/?hosted_button_id=PLACEHOLDER'; // Replace with Lisa's PayPal link
         
         // Google Sheets webhook for donation logging
         const SHEETS_WEBHOOK = ''; // Will be set when Google Sheet is created
+        
+        // EmailJS configuration (free: 200 emails/month)
+        // Sign up at https://www.emailjs.com — connect Gmail, create template
+        const EMAILJS_PUBLIC_KEY = ''; // Your EmailJS public key
+        const EMAILJS_SERVICE_ID = ''; // e.g. 'service_xxxxx'  
+        const EMAILJS_TEMPLATE_ID = ''; // e.g. 'template_xxxxx'
+        if (EMAILJS_PUBLIC_KEY) { emailjs.init(EMAILJS_PUBLIC_KEY); }
         
         function validateBuyer() {
             const name = document.getElementById('buyer-name').value.trim();
@@ -988,64 +1002,215 @@
             return entry;
         }
         
-        function showConfirmation(name, email) {
+        function generateTicketId() {
+            return 'CALABA-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+        }
+        
+        function generateTicketImage(name, ticketCount, amount, ticketIds) {
+            const canvas = document.getElementById('ticket-canvas');
+            const ctx = canvas.getContext('2d');
+            const w = 800, h = 420;
+            canvas.width = w;
+            canvas.height = h;
+            
+            // Background gradient
+            const grad = ctx.createLinearGradient(0, 0, w, h);
+            grad.addColorStop(0, '#1e3a5f');
+            grad.addColorStop(1, '#0891b2');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, w, h, 20);
+            ctx.fill();
+            
+            // Decorative circles
+            ctx.globalAlpha = 0.08;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.arc(680, 80, 120, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(100, 350, 80, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+            
+            // Perforated edge (left side)
+            ctx.setLineDash([8, 8]);
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(580, 20);
+            ctx.lineTo(580, h - 20);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Left section - Main ticket info
+            // Header
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = 'bold 14px Inter, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('🎟️  CalABA 2026 CONFERENCE', 40, 50);
+            
+            // Title
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 36px Inter, sans-serif';
+            ctx.fillText('RAFFLE TICKET', 40, 95);
+            
+            // Divider line
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(40, 112, 120, 3);
+            
+            // Name
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = '13px Inter, sans-serif';
+            ctx.fillText('TICKET HOLDER', 40, 155);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 26px Inter, sans-serif';
+            const displayName = name.length > 24 ? name.substring(0, 22) + '…' : name;
+            ctx.fillText(displayName, 40, 185);
+            
+            // Ticket count & amount
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = '13px Inter, sans-serif';
+            ctx.fillText('TICKETS', 40, 230);
+            ctx.fillText('AMOUNT', 200, 230);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 28px Inter, sans-serif';
+            ctx.fillText(ticketCount + '×', 40, 262);
+            ctx.fillStyle = '#10b981';
+            ctx.fillText('$' + amount, 200, 262);
+            
+            // Ticket IDs
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = '13px Inter, sans-serif';
+            ctx.fillText('TICKET ID' + (ticketIds.length > 1 ? 'S' : ''), 40, 305);
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = 'bold 13px monospace';
+            ticketIds.forEach((id, i) => {
+                const row = Math.floor(i / 2);
+                const col = i % 2;
+                ctx.fillText(id, 40 + col * 260, 325 + row * 18);
+            });
+            
+            // Event details at bottom
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = '12px Inter, sans-serif';
+            ctx.fillText('March 5-7, 2026 • Sacramento, CA • Must be present to win', 40, h - 25);
+            
+            // Right section - stub
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = 'bold 12px Inter, sans-serif';
+            ctx.fillText('KEEP THIS', 690, 50);
+            ctx.fillText('STUB', 690, 65);
+            
+            // Rotated text on stub
+            ctx.save();
+            ctx.translate(690, 240);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.font = 'bold 36px Inter, sans-serif';
+            ctx.fillText(ticketCount + '×', 0, 0);
+            ctx.restore();
+            
+            // Stub ticket number
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = '11px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(ticketIds[0], 690, h - 30);
+            
+            return canvas;
+        }
+        
+        function showConfirmation(name, email, ticketCount, amount) {
             document.getElementById('confirm-name').textContent = name;
             document.getElementById('confirm-email').textContent = email;
             document.getElementById('ticket-step-info').style.display = 'none';
             document.getElementById('ticket-step-confirm').style.display = 'block';
+            
+            // Generate unique ticket IDs
+            const ticketIds = [];
+            for (let i = 0; i < ticketCount; i++) {
+                ticketIds.push(generateTicketId());
+            }
+            
+            // Generate ticket image
+            generateTicketImage(name, ticketCount, amount, ticketIds);
+            
+            // Download button
+            document.getElementById('download-ticket-btn').onclick = function() {
+                const canvas = document.getElementById('ticket-canvas');
+                const link = document.createElement('a');
+                link.download = `calaba-2026-raffle-ticket-${ticketIds[0]}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+            
+            // Auto-email ticket via EmailJS
+            if (EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
+                const canvas = document.getElementById('ticket-canvas');
+                const ticketImage = canvas.toDataURL('image/png');
+                
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_name: name,
+                    to_email: email,
+                    ticket_count: ticketCount,
+                    amount: '$' + amount,
+                    ticket_ids: ticketIds.join(', '),
+                    ticket_image: ticketImage
+                }).then(() => {
+                    document.getElementById('email-status').style.display = 'block';
+                    document.getElementById('email-error').style.display = 'none';
+                }).catch(() => {
+                    document.getElementById('email-error').style.display = 'block';
+                    document.getElementById('email-status').style.display = 'none';
+                });
+            } else {
+                // No EmailJS configured — prompt download
+                document.getElementById('email-error').style.display = 'block';
+            }
         }
         
         function purchaseTickets(amount, ticketCount, note) {
             const buyer = validateBuyer();
             if (!buyer) return;
             
-            logDonation(buyer.name, buyer.email, amount, ticketCount, 'venmo');
+            logDonation(buyer.name, buyer.email, amount, ticketCount, 'paypal');
             
-            const venmoNote = `${note} | ${buyer.name} | ${buyer.email}`;
-            const venmoUrl = `venmo://paycharge?txn=pay&recipients=${VENMO_USERNAME}&amount=${amount}&note=${encodeURIComponent(venmoNote)}`;
-            const webUrl = `https://venmo.com/${VENMO_USERNAME}?txn=pay&amount=${amount}&note=${encodeURIComponent(venmoNote)}`;
+            const paypalNote = encodeURIComponent(`${note} | ${buyer.name} | ${buyer.email}`);
+            const paypalUrl = `${PAYPAL_LINK}&amount=${amount}&item_name=${paypalNote}`;
             
-            // Open Venmo
-            window.location.href = venmoUrl;
-            setTimeout(() => {
-                window.open(webUrl, '_blank');
-            }, 500);
+            // Open PayPal
+            window.open(paypalUrl, '_blank');
             
-            showConfirmation(buyer.name, buyer.email);
+            showConfirmation(buyer.name, buyer.email, ticketCount, amount);
             createConfetti();
         }
         
         document.getElementById('ticket-1').addEventListener('click', (e) => {
             e.preventDefault();
-            purchaseTickets(10, 1, 'BAE SIG Raffle - 1 Ticket');
+            purchaseTickets(10, 1, 'CalABA Raffle - 1 Ticket');
         });
         
         document.getElementById('ticket-3').addEventListener('click', (e) => {
             e.preventDefault();
-            purchaseTickets(25, 3, 'BAE SIG Raffle - 3 Tickets');
+            purchaseTickets(25, 3, 'CalABA Raffle - 3 Tickets');
         });
         
         document.getElementById('ticket-7').addEventListener('click', (e) => {
             e.preventDefault();
-            purchaseTickets(40, 7, 'BAE SIG Raffle - 7 Tickets');
+            purchaseTickets(40, 7, 'CalABA Raffle - 7 Tickets');
         });
         
         document.getElementById('buy-btn').addEventListener('click', (e) => {
             e.preventDefault();
-            purchaseTickets(40, 7, 'BAE SIG Raffle - 7 Tickets');
+            purchaseTickets(40, 7, 'CalABA Raffle - 7 Tickets');
         });
         
         document.getElementById('donate-btn').addEventListener('click', (e) => {
             e.preventDefault();
             const buyer = validateBuyer();
             if (!buyer) return;
-            logDonation(buyer.name, buyer.email, 'custom', 0, 'venmo-donation');
-            const venmoNote = `BAE SIG Donation | ${buyer.name} | ${buyer.email}`;
-            const venmoUrl = `venmo://paycharge?txn=pay&recipients=${VENMO_USERNAME}&amount=&note=${encodeURIComponent(venmoNote)}`;
-            const webUrl = `https://venmo.com/${VENMO_USERNAME}?txn=pay&amount=&note=${encodeURIComponent(venmoNote)}`;
-            window.location.href = venmoUrl;
-            setTimeout(() => { window.open(webUrl, '_blank'); }, 500);
-            showConfirmation(buyer.name, buyer.email);
+            logDonation(buyer.name, buyer.email, 'custom', 0, 'paypal-donation');
+            const donateNote = encodeURIComponent(`CalABA Donation | ${buyer.name} | ${buyer.email}`);
+            const donateUrl = `${PAYPAL_LINK}&item_name=${donateNote}`;
+            window.open(donateUrl, '_blank');
+            showConfirmation(buyer.name, buyer.email, 0, 'Donation');
             createConfetti();
         });
         
