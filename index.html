@@ -832,32 +832,55 @@
                 <span class="urgency-text"><strong>Online sales end Friday, March 6 at 12 PM!</strong> Get your tickets now before the cutoff.</span>
             </div>
             
-            <div class="ticket-grid">
-                <a href="#" class="ticket-option" id="ticket-1">
-                    <span class="price">$10</span>
-                    <span class="count">1 ticket</span>
-                    <span class="per-ticket">$10 each</span>
-                </a>
-                <a href="#" class="ticket-option" id="ticket-3">
-                    <span class="price">$25</span>
-                    <span class="count">3 tickets</span>
-                    <span class="per-ticket">$8.33 each</span>
-                </a>
-                <a href="#" class="ticket-option featured" id="ticket-7">
-                    <span class="price">$40</span>
-                    <span class="count">7 tickets</span>
-                    <span class="per-ticket">$5.71 each</span>
+            <!-- Step 1: Info capture -->
+            <div id="ticket-step-info">
+                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">Enter your info so we can track your tickets and contact you if you win! 🎉</p>
+                <div style="display: grid; gap: 12px; margin-bottom: 16px;">
+                    <input type="text" id="buyer-name" placeholder="Your full name" required
+                        style="width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 10px; font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='var(--calaba-teal)'" onblur="this.style.borderColor='var(--border)'">
+                    <input type="email" id="buyer-email" placeholder="Your email address" required
+                        style="width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 10px; font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='var(--calaba-teal)'" onblur="this.style.borderColor='var(--border)'">
+                </div>
+
+                <div class="ticket-grid">
+                    <a href="#" class="ticket-option" id="ticket-1">
+                        <span class="price">$10</span>
+                        <span class="count">1 ticket</span>
+                        <span class="per-ticket">$10 each</span>
+                    </a>
+                    <a href="#" class="ticket-option" id="ticket-3">
+                        <span class="price">$25</span>
+                        <span class="count">3 tickets</span>
+                        <span class="per-ticket">$8.33 each</span>
+                    </a>
+                    <a href="#" class="ticket-option featured" id="ticket-7">
+                        <span class="price">$40</span>
+                        <span class="count">7 tickets</span>
+                        <span class="per-ticket">$5.71 each</span>
+                    </a>
+                </div>
+
+                <button class="btn-primary pulse" id="buy-btn">
+                    <span>🎟️</span>
+                    <span>Buy Tickets via Venmo</span>
+                </button>
+                
+                <a href="#" class="btn-secondary" id="donate-btn">
+                    💚 Make a Direct Donation
                 </a>
             </div>
 
-            <button class="btn-primary pulse" id="buy-btn">
-                <span>🎟️</span>
-                <span>Buy Tickets via Venmo</span>
-            </button>
-            
-            <a href="#" class="btn-secondary" id="donate-btn">
-                💚 Make a Direct Donation
-            </a>
+            <!-- Step 2: Confirmation after redirect -->
+            <div id="ticket-step-confirm" style="display: none; text-align: center; padding: 20px 0;">
+                <div style="font-size: 48px; margin-bottom: 12px;">✅</div>
+                <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Thanks, <span id="confirm-name"></span>!</h3>
+                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">Your ticket purchase has been logged. Complete your payment via Venmo if you haven't already.</p>
+                <p style="font-size: 13px; color: var(--text-muted);">A confirmation will be sent to <strong id="confirm-email"></strong></p>
+                <button onclick="document.getElementById('ticket-step-info').style.display='block'; document.getElementById('ticket-step-confirm').style.display='none';" 
+                    class="btn-secondary" style="margin-top: 16px;">← Buy More Tickets</button>
+            </div>
 
             <div class="rules">
                 <h3>⚠️ Must Be Present to Win</h3>
@@ -921,43 +944,124 @@
         // Venmo configuration
         const VENMO_USERNAME = 'CalABA';
         
-        function openVenmo(amount, note) {
-            const venmoUrl = `venmo://paycharge?txn=pay&recipients=${VENMO_USERNAME}&amount=${amount}&note=${encodeURIComponent(note)}`;
-            const webUrl = `https://venmo.com/${VENMO_USERNAME}?txn=pay&amount=${amount}&note=${encodeURIComponent(note)}`;
+        // Google Sheets webhook for donation logging
+        const SHEETS_WEBHOOK = ''; // Will be set when Google Sheet is created
+        
+        function validateBuyer() {
+            const name = document.getElementById('buyer-name').value.trim();
+            const email = document.getElementById('buyer-email').value.trim();
+            if (!name) {
+                document.getElementById('buyer-name').style.borderColor = '#ef4444';
+                document.getElementById('buyer-name').focus();
+                return null;
+            }
+            if (!email || !email.includes('@')) {
+                document.getElementById('buyer-email').style.borderColor = '#ef4444';
+                document.getElementById('buyer-email').focus();
+                return null;
+            }
+            return { name, email };
+        }
+        
+        function logDonation(name, email, amount, tickets, method) {
+            const entry = {
+                timestamp: new Date().toISOString(),
+                name, email, amount, tickets, method,
+                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5)
+            };
             
+            // Save to localStorage as backup
+            const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
+            donations.push(entry);
+            localStorage.setItem('sig_raffle_donations', JSON.stringify(donations));
+            
+            // Send to Google Sheets webhook if configured
+            if (SHEETS_WEBHOOK) {
+                fetch(SHEETS_WEBHOOK, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(entry)
+                }).catch(() => {});
+            }
+            
+            return entry;
+        }
+        
+        function showConfirmation(name, email) {
+            document.getElementById('confirm-name').textContent = name;
+            document.getElementById('confirm-email').textContent = email;
+            document.getElementById('ticket-step-info').style.display = 'none';
+            document.getElementById('ticket-step-confirm').style.display = 'block';
+        }
+        
+        function purchaseTickets(amount, ticketCount, note) {
+            const buyer = validateBuyer();
+            if (!buyer) return;
+            
+            logDonation(buyer.name, buyer.email, amount, ticketCount, 'venmo');
+            
+            const venmoNote = `${note} | ${buyer.name} | ${buyer.email}`;
+            const venmoUrl = `venmo://paycharge?txn=pay&recipients=${VENMO_USERNAME}&amount=${amount}&note=${encodeURIComponent(venmoNote)}`;
+            const webUrl = `https://venmo.com/${VENMO_USERNAME}?txn=pay&amount=${amount}&note=${encodeURIComponent(venmoNote)}`;
+            
+            // Open Venmo
             window.location.href = venmoUrl;
             setTimeout(() => {
-                window.location.href = webUrl;
+                window.open(webUrl, '_blank');
             }, 500);
             
-            // Trigger confetti
+            showConfirmation(buyer.name, buyer.email);
             createConfetti();
         }
         
         document.getElementById('ticket-1').addEventListener('click', (e) => {
             e.preventDefault();
-            openVenmo(10, 'BAE SIG Raffle - 1 Ticket');
+            purchaseTickets(10, 1, 'BAE SIG Raffle - 1 Ticket');
         });
         
         document.getElementById('ticket-3').addEventListener('click', (e) => {
             e.preventDefault();
-            openVenmo(25, 'BAE SIG Raffle - 3 Tickets');
+            purchaseTickets(25, 3, 'BAE SIG Raffle - 3 Tickets');
         });
         
         document.getElementById('ticket-7').addEventListener('click', (e) => {
             e.preventDefault();
-            openVenmo(40, 'BAE SIG Raffle - 7 Tickets');
+            purchaseTickets(40, 7, 'BAE SIG Raffle - 7 Tickets');
         });
         
         document.getElementById('buy-btn').addEventListener('click', (e) => {
             e.preventDefault();
-            openVenmo(40, 'BAE SIG Raffle - 7 Tickets');
+            purchaseTickets(40, 7, 'BAE SIG Raffle - 7 Tickets');
         });
         
         document.getElementById('donate-btn').addEventListener('click', (e) => {
             e.preventDefault();
-            openVenmo('', 'BAE SIG Donation');
+            const buyer = validateBuyer();
+            if (!buyer) return;
+            logDonation(buyer.name, buyer.email, 'custom', 0, 'venmo-donation');
+            const venmoNote = `BAE SIG Donation | ${buyer.name} | ${buyer.email}`;
+            const venmoUrl = `venmo://paycharge?txn=pay&recipients=${VENMO_USERNAME}&amount=&note=${encodeURIComponent(venmoNote)}`;
+            const webUrl = `https://venmo.com/${VENMO_USERNAME}?txn=pay&amount=&note=${encodeURIComponent(venmoNote)}`;
+            window.location.href = venmoUrl;
+            setTimeout(() => { window.open(webUrl, '_blank'); }, 500);
+            showConfirmation(buyer.name, buyer.email);
+            createConfetti();
         });
+        
+        // Admin: Export donations as CSV (type "exportdonations" in console)
+        window.exportDonations = function() {
+            const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
+            if (!donations.length) { console.log('No donations logged yet.'); return; }
+            const csv = 'Timestamp,Name,Email,Amount,Tickets,Method,ID\n' + 
+                donations.map(d => `${d.timestamp},"${d.name}","${d.email}",${d.amount},${d.tickets},${d.method},${d.id}`).join('\n');
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'sig-raffle-donations.csv';
+            a.click();
+            console.log(`Exported ${donations.length} donations.`);
+        };
         
         // Confetti
         const canvas = document.getElementById('confetti');
