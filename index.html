@@ -670,9 +670,7 @@
 <body>
     <canvas id="confetti"></canvas>
     
-    <div class="preview-banner">
-        ⚠️ PREVIEW ONLY - Site not live yet. Payment links coming soon!
-    </div>
+    <!-- Preview banner removed — site is LIVE -->
     
     <div class="hero">
         <div class="hero-content">
@@ -1170,11 +1168,8 @@
             
             logDonation(buyer.name, buyer.email, amount, ticketCount, 'paypal');
             
-            const paypalNote = encodeURIComponent(`${note} | ${buyer.name} | ${buyer.email}`);
-            const paypalUrl = `${PAYPAL_LINK}&amount=${amount}&item_name=${paypalNote}`;
-            
-            // Open PayPal
-            window.open(paypalUrl, '_blank');
+            // PayPal NCP links are static — open the base payment page
+            window.open(PAYPAL_LINK, '_blank');
             
             showConfirmation(buyer.name, buyer.email, ticketCount, amount);
             updateProgress();
@@ -1206,9 +1201,7 @@
             const buyer = validateBuyer();
             if (!buyer) return;
             logDonation(buyer.name, buyer.email, 'custom', 0, 'paypal-donation');
-            const donateNote = encodeURIComponent(`CalABA Donation | ${buyer.name} | ${buyer.email}`);
-            const donateUrl = `${PAYPAL_LINK}&item_name=${donateNote}`;
-            window.open(donateUrl, '_blank');
+            window.open(PAYPAL_LINK, '_blank');
             showConfirmation(buyer.name, buyer.email, 0, 'Donation');
             createConfetti();
         });
