@@ -985,6 +985,7 @@
             const entry = {
                 timestamp: new Date().toISOString(),
                 name, email, amount, tickets, method,
+                verified: true,
                 id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5)
             };
             
@@ -1304,11 +1305,23 @@
             canvas.height = window.innerHeight;
         });
         
+        // Clear any pre-fix unverified donations from localStorage
+        // (tickets generated before payment verification was added)
+        (function cleanOldDonations() {
+            const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
+            // Only keep donations marked as verified (added after the fix)
+            const verified = donations.filter(d => d.verified === true);
+            if (verified.length !== donations.length) {
+                localStorage.setItem('sig_raffle_donations', JSON.stringify(verified));
+            }
+        })();
+
         // Update progress bar from localStorage donations
         function updateProgress() {
             const GOAL = 500; // $500 fundraising goal
             const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
-            const total = donations.reduce((sum, d) => {
+            const verified = donations.filter(d => d.verified === true);
+            const total = verified.reduce((sum, d) => {
                 const amt = parseFloat(d.amount);
                 return sum + (isNaN(amt) ? 0 : amt);
             }, 0);
@@ -1316,7 +1329,7 @@
             document.getElementById('progress-fill').style.width = pct + '%';
             if (total > 0) {
                 document.getElementById('progress-text').innerHTML = 
-                    `<strong>$${total}</strong> raised of $${GOAL} goal (${pct}%) — ${donations.length} ticket purchase${donations.length !== 1 ? 's' : ''} 🎉`;
+                    `<strong>$${total}</strong> raised of $${GOAL} goal (${pct}%) -- ${verified.length} ticket purchase${verified.length !== 1 ? 's' : ''}`;
             }
         }
         updateProgress();
