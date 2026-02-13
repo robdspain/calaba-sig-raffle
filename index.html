@@ -860,31 +860,31 @@
                 </div>
 
                 <div class="ticket-grid">
-                    <a href="#" class="ticket-option" id="ticket-1">
+                    <a href="#" class="ticket-option" id="ticket-1" data-tickets="1" data-amount="10">
                         <span class="price">$10</span>
                         <span class="count">1 ticket</span>
                         <span class="per-ticket">$10 each</span>
                     </a>
-                    <a href="#" class="ticket-option" id="ticket-3">
-                        <span class="price">$25</span>
+                    <a href="#" class="ticket-option" id="ticket-3" data-tickets="3" data-amount="20">
+                        <span class="price">$20</span>
                         <span class="count">3 tickets</span>
-                        <span class="per-ticket">$8.33 each</span>
+                        <span class="per-ticket">$6.67 each</span>
                     </a>
-                    <a href="#" class="ticket-option featured" id="ticket-7">
+                    <a href="#" class="ticket-option featured" id="ticket-7" data-tickets="7" data-amount="40">
                         <span class="price">$40</span>
                         <span class="count">7 tickets</span>
                         <span class="per-ticket">$5.71 each</span>
                     </a>
                 </div>
 
-                <button class="btn-primary pulse" id="buy-btn">
-                    <span>🎟️</span>
-                    <span>Buy Tickets via PayPal</span>
+                <button class="btn-primary pulse" id="buy-btn-stripe">
+                    <span>💳</span>
+                    <span>Buy Tickets with Card (Stripe)</span>
                 </button>
                 
-                <a href="#" class="btn-secondary" id="donate-btn">
-                    💚 Make a Direct Donation
-                </a>
+                <button class="btn-secondary" id="buy-btn-paypal" style="margin-top: 12px; border: 2px solid var(--border); background: white;">
+                    <span style="color: #0070ba;">PayPal</span> - Alternative Payment
+                </button>
             </div>
 
             <!-- Step 2: Confirmation with generated ticket -->
@@ -1208,34 +1208,67 @@
             };
         }
         
-        document.getElementById('ticket-1').addEventListener('click', (e) => {
-            e.preventDefault();
-            purchaseTickets(10, 1, 'CalABA Raffle - 1 Ticket');
+        // Track selected ticket option
+        let selectedTicketCount = 7; // Default to best value
+        let selectedAmount = 40;
+        
+        document.querySelectorAll('.ticket-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.ticket-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedTicketCount = parseInt(option.dataset.tickets);
+                selectedAmount = parseInt(option.dataset.amount);
+            });
         });
         
-        document.getElementById('ticket-3').addEventListener('click', (e) => {
-            e.preventDefault();
-            purchaseTickets(25, 3, 'CalABA Raffle - 3 Tickets');
-        });
+        // Default selection
+        document.getElementById('ticket-7').classList.add('selected');
         
-        document.getElementById('ticket-7').addEventListener('click', (e) => {
-            e.preventDefault();
-            purchaseTickets(40, 7, 'CalABA Raffle - 7 Tickets');
-        });
-        
-        document.getElementById('buy-btn').addEventListener('click', (e) => {
-            e.preventDefault();
-            purchaseTickets(40, 7, 'CalABA Raffle - 7 Tickets');
-        });
-        
-        document.getElementById('donate-btn').addEventListener('click', (e) => {
+        // Stripe checkout
+        document.getElementById('buy-btn-stripe').addEventListener('click', async (e) => {
             e.preventDefault();
             const buyer = validateBuyer();
             if (!buyer) return;
-            logDonation(buyer.name, buyer.email, 'custom', 0, 'paypal-donation');
-            window.open(PAYPAL_LINK, '_blank');
-            showConfirmation(buyer.name, buyer.email, 0, 'Donation');
-            createConfetti();
+            
+            // Show loading state
+            const btn = e.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span><span>Processing...</span>';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/create-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ticketCount: selectedTicketCount,
+                        amount: selectedAmount,
+                        customerName: buyer.name,
+                        customerEmail: buyer.email
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.url) {
+                    // Redirect to Stripe Checkout
+                    window.location.href = data.url;
+                } else {
+                    throw new Error(data.error || 'Failed to create checkout session');
+                }
+            } catch (error) {
+                console.error('Checkout error:', error);
+                alert('Payment error: ' + error.message + '. Please try PayPal instead or contact us.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+        
+        // PayPal checkout (legacy)
+        document.getElementById('buy-btn-paypal').addEventListener('click', (e) => {
+            e.preventDefault();
+            purchaseTickets(selectedAmount, selectedTicketCount, `CalABA Raffle - ${selectedTicketCount} Ticket${selectedTicketCount > 1 ? 's' : ''}`);
         });
         
         // Admin: Export donations as CSV (type "exportdonations" in console)
@@ -1318,22 +1351,45 @@
         })();
 
         // Update progress bar from localStorage donations
-        function updateProgress() {
+        async function updateProgress() {
             const GOAL = 2000; // $2,000 fundraising goal
-            const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
-            const verified = donations.filter(d => d.verified === true);
-            const total = verified.reduce((sum, d) => {
-                const amt = parseFloat(d.amount);
-                return sum + (isNaN(amt) ? 0 : amt);
-            }, 0);
-            const pct = Math.min(100, Math.round((total / GOAL) * 100));
-            document.getElementById('progress-fill').style.width = pct + '%';
-            if (total > 0) {
-                document.getElementById('progress-text').innerHTML = 
-                    `<strong>$${total}</strong> raised of $${GOAL} goal (${pct}%) -- ${verified.length} ticket purchase${verified.length !== 1 ? 's' : ''}`;
+            
+            try {
+                // Fetch from centralized API (summary only, no auth needed)
+                const response = await fetch('/api/purchases?summary=true');
+                const data = await response.json();
+                
+                if (data.summary) {
+                    const total = data.summary.totalRevenue;
+                    const ticketCount = data.summary.totalTickets;
+                    const pct = Math.min(100, Math.round((total / GOAL) * 100));
+                    
+                    document.getElementById('progress-fill').style.width = pct + '%';
+                    if (total > 0) {
+                        document.getElementById('progress-text').innerHTML = 
+                            `<strong>$${total.toFixed(0)}</strong> raised of $${GOAL} goal (${pct}%) -- ${ticketCount} ticket${ticketCount !== 1 ? 's' : ''} sold`;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch progress:', error);
+                // Fallback to localStorage for PayPal purchases
+                const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
+                const verified = donations.filter(d => d.verified === true);
+                const total = verified.reduce((sum, d) => {
+                    const amt = parseFloat(d.amount);
+                    return sum + (isNaN(amt) ? 0 : amt);
+                }, 0);
+                const pct = Math.min(100, Math.round((total / GOAL) * 100));
+                document.getElementById('progress-fill').style.width = pct + '%';
+                if (total > 0) {
+                    document.getElementById('progress-text').innerHTML = 
+                        `<strong>$${total}</strong> raised of $${GOAL} goal (${pct}%)`;
+                }
             }
         }
         updateProgress();
+        // Update progress every 30 seconds
+        setInterval(updateProgress, 30000);
     </script>
 </body>
 </html>

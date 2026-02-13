@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "nodemailer": "^6.9.0"
+    "stripe": "^14.0.0",
+    "@vercel/kv": "^1.0.0",
+    "resend": "^3.0.0"
   }
 }

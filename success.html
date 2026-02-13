@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - CalABA 2026 Raffle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --calaba-green: #1E3A34;
+            --calaba-gold: #E3B23C;
+            --calaba-cream: #FAF3E0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #525252;
+            --bg-gray: #f8fafc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--calaba-green) 0%, #0c4a6e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .success-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .success-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .success-icon h1 {
+            color: white;
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 40px 32px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--bg-gray);
+            border-top-color: var(--calaba-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .ticket-info {
+            background: var(--calaba-cream);
+            border: 2px solid var(--calaba-gold);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .ticket-info h2 {
+            color: var(--calaba-green);
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(30, 58, 52, 0.1);
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--calaba-green);
+        }
+        
+        .ticket-numbers {
+            margin-top: 16px;
+        }
+        
+        .ticket-number {
+            background: var(--calaba-green);
+            color: var(--calaba-gold);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+            margin: 8px 0;
+            border: 2px solid var(--calaba-gold);
+        }
+        
+        .notice {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .notice-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+        
+        .notice-text {
+            font-size: 14px;
+            color: #a16207;
+            line-height: 1.6;
+        }
+        
+        .event-details {
+            background: var(--bg-gray);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+        
+        .event-details h3 {
+            color: var(--calaba-green);
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .event-item {
+            font-size: 14px;
+        }
+        
+        .event-item strong {
+            color: var(--calaba-green);
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--calaba-green), #0c4a6e);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 12px;
+            margin-top: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(30, 58, 52, 0.3);
+        }
+        
+        .email-note {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .email-note strong {
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">
+            <div class="checkmark">✓</div>
+            <h1>Payment Successful!</h1>
+        </div>
+        
+        <div class="content">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p style="color: var(--text-secondary);">Loading your ticket details...</p>
+            </div>
+            
+            <div id="ticket-details" style="display: none;">
+                <p style="font-size: 16px; color: var(--text-primary); margin-bottom: 8px;">
+                    Thank you, <strong id="customer-name"></strong>!
+                </p>
+                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">
+                    Your payment has been processed successfully. Your raffle tickets have been confirmed and emailed to you.
+                </p>
+                
+                <div class="ticket-info">
+                    <h2>Your Raffle Tickets</h2>
+                    <div class="info-row">
+                        <span class="info-label">Tickets</span>
+                        <span class="info-value" id="ticket-count"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Amount Paid</span>
+                        <span class="info-value" id="amount-paid"></span>
+                    </div>
+                    <div class="ticket-numbers">
+                        <div class="info-label" style="margin-bottom: 8px;">Your Ticket Numbers:</div>
+                        <div id="ticket-numbers-list"></div>
+                    </div>
+                </div>
+                
+                <div class="notice">
+                    <div class="notice-title">IMPORTANT: You Must Be Present to Win</div>
+                    <div class="notice-text">
+                        Winners will be drawn throughout the reception starting at 6:00 PM on Friday, March 6, 2026. 
+                        You must be present in Room 8 during the drawings to claim your prize.
+                    </div>
+                </div>
+                
+                <div class="event-details">
+                    <h3>Event Details</h3>
+                    <div class="event-grid">
+                        <div class="event-item">
+                            <strong>Date</strong>
+                            Friday, March 6, 2026
+                        </div>
+                        <div class="event-item">
+                            <strong>Time</strong>
+                            5:00 PM - 8:00 PM
+                        </div>
+                        <div class="event-item">
+                            <strong>Location</strong>
+                            Room 8
+                        </div>
+                        <div class="event-item">
+                            <strong>Drawings Begin</strong>
+                            6:00 PM
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="/" class="btn">Return to Raffle Page</a>
+                
+                <div class="email-note">
+                    <strong>Check your email!</strong><br>
+                    A confirmation email with your ticket details has been sent to <strong id="customer-email"></strong>
+                </div>
+            </div>
+            
+            <div id="error-message" style="display: none;">
+                <p style="color: #dc2626; text-align: center; padding: 20px;">
+                    We couldn't load your ticket details. Please check your email for confirmation, 
+                    or <a href="/" style="color: #0891b2;">return to the raffle page</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Get session ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        
+        if (!sessionId) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-message').style.display = 'block';
+        } else {
+            // In a real implementation, you would fetch session details from Stripe
+            // For now, we'll show a generic success message
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('ticket-details').style.display = 'block';
+                
+                // These would be populated from actual session data
+                document.getElementById('customer-name').textContent = 'Valued Supporter';
+                document.getElementById('ticket-count').textContent = 'Confirmed';
+                document.getElementById('amount-paid').textContent = 'Received';
+                document.getElementById('customer-email').textContent = 'your registered email';
+                document.getElementById('ticket-numbers-list').innerHTML = 
+                    '<div style="text-align: center; padding: 20px; color: #10b981;">Your ticket numbers have been emailed to you!</div>';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
