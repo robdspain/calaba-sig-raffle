@@ -1318,7 +1318,7 @@
 
         // Update progress bar from localStorage donations
         function updateProgress() {
-            const GOAL = 500; // $500 fundraising goal
+            const GOAL = 2000; // $2,000 fundraising goal
             const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
             const verified = donations.filter(d => d.verified === true);
             const total = verified.reduce((sum, d) => {
