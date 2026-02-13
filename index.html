@@ -1029,94 +1029,68 @@
             // Decorative circles
             ctx.globalAlpha = 0.08;
             ctx.fillStyle = '#fff';
-            ctx.beginPath(); ctx.arc(680, 80, 120, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.arc(100, 350, 80, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(700, 80, 140, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(100, 380, 100, 0, Math.PI * 2); ctx.fill();
             ctx.globalAlpha = 1;
             
-            // Perforated edge (left side)
-            ctx.setLineDash([8, 8]);
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(580, 20);
-            ctx.lineTo(580, h - 20);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // Left section - Main ticket info
             // Header
             ctx.fillStyle = '#f59e0b';
             ctx.font = 'bold 14px Inter, sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText('🎟️  CalABA 2026 CONFERENCE', 40, 50);
+            ctx.fillText('CalABA 2026 CONFERENCE', 40, 50);
             
             // Title
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 36px Inter, sans-serif';
-            ctx.fillText('RAFFLE TICKET', 40, 95);
+            ctx.font = 'bold 40px Inter, sans-serif';
+            ctx.fillText('RAFFLE TICKET', 40, 100);
             
             // Divider line
             ctx.fillStyle = '#f59e0b';
-            ctx.fillRect(40, 112, 120, 3);
+            ctx.fillRect(40, 118, 140, 3);
             
             // Name
             ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.font = '13px Inter, sans-serif';
-            ctx.fillText('TICKET HOLDER', 40, 155);
+            ctx.fillText('TICKET HOLDER', 40, 160);
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 26px Inter, sans-serif';
-            const displayName = name.length > 24 ? name.substring(0, 22) + '…' : name;
-            ctx.fillText(displayName, 40, 185);
+            ctx.font = 'bold 30px Inter, sans-serif';
+            const displayName = name.length > 30 ? name.substring(0, 28) + '...' : name;
+            ctx.fillText(displayName, 40, 195);
             
-            // Ticket count & amount
+            // Ticket count & amount (right-aligned)
             ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.font = '13px Inter, sans-serif';
-            ctx.fillText('TICKETS', 40, 230);
-            ctx.fillText('AMOUNT', 200, 230);
+            ctx.textAlign = 'right';
+            ctx.fillText('TICKETS', w - 200, 160);
+            ctx.fillText('AMOUNT', w - 60, 160);
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 28px Inter, sans-serif';
-            ctx.fillText(ticketCount + '×', 40, 262);
+            ctx.font = 'bold 32px Inter, sans-serif';
+            ctx.fillText(ticketCount + 'x', w - 200, 195);
             ctx.fillStyle = '#10b981';
-            ctx.fillText('$' + amount, 200, 262);
+            ctx.fillText('$' + amount, w - 40, 195);
             
             // Ticket IDs
+            ctx.textAlign = 'left';
             ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.font = '13px Inter, sans-serif';
-            ctx.fillText('TICKET ID' + (ticketIds.length > 1 ? 'S' : ''), 40, 305);
+            ctx.fillText('TICKET ID' + (ticketIds.length > 1 ? 'S' : ''), 40, 245);
             ctx.fillStyle = '#f59e0b';
-            ctx.font = 'bold 13px monospace';
+            ctx.font = 'bold 14px monospace';
             ticketIds.forEach((id, i) => {
-                const row = Math.floor(i / 2);
-                const col = i % 2;
-                ctx.fillText(id, 40 + col * 260, 325 + row * 18);
+                const row = Math.floor(i / 3);
+                const col = i % 3;
+                ctx.fillText(id, 40 + col * 250, 268 + row * 22);
             });
             
-            // Event details at bottom
-            ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.font = '12px Inter, sans-serif';
-            ctx.fillText('March 5-7, 2026 • Sacramento, CA • Must be present to win', 40, h - 25);
-            
-            // Right section - stub
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#f59e0b';
-            ctx.font = 'bold 12px Inter, sans-serif';
-            ctx.fillText('KEEP THIS', 690, 50);
-            ctx.fillText('STUB', 690, 65);
-            
-            // Rotated text on stub
-            ctx.save();
-            ctx.translate(690, 240);
-            ctx.rotate(-Math.PI / 2);
+            // Confirmation note
             ctx.fillStyle = 'rgba(255,255,255,0.6)';
-            ctx.font = 'bold 36px Inter, sans-serif';
-            ctx.fillText(ticketCount + '×', 0, 0);
-            ctx.restore();
+            ctx.font = '13px Inter, sans-serif';
+            ctx.fillText('Save this ticket as proof of purchase. Present at the conference to claim prizes.', 40, h - 55);
             
-            // Stub ticket number
-            ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.font = '11px monospace';
-            ctx.textAlign = 'center';
-            ctx.fillText(ticketIds[0], 690, h - 30);
+            // Event details at bottom
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '12px Inter, sans-serif';
+            ctx.fillText('March 5-7, 2026  |  Sacramento, CA  |  Must be present to win', 40, h - 25);
             
             return canvas;
         }
