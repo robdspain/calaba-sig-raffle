@@ -1176,14 +1176,60 @@
             const buyer = validateBuyer();
             if (!buyer) return;
             
-            logDonation(buyer.name, buyer.email, amount, ticketCount, 'paypal');
-            
-            // PayPal NCP links are static — open the base payment page
+            // Open PayPal in new tab
             window.open(PAYPAL_LINK, '_blank');
             
-            showConfirmation(buyer.name, buyer.email, ticketCount, amount);
-            updateProgress();
-            createConfetti();
+            // Show payment verification step instead of generating ticket immediately
+            document.getElementById('ticket-step-info').style.display = 'none';
+            document.getElementById('ticket-step-confirm').style.display = 'none';
+            
+            // Create or show payment verification step
+            let verifyStep = document.getElementById('ticket-step-verify');
+            if (!verifyStep) {
+                verifyStep = document.createElement('div');
+                verifyStep.id = 'ticket-step-verify';
+                verifyStep.style.cssText = 'text-align: center; padding: 20px 0;';
+                verifyStep.innerHTML = `
+                    <div style="font-size: 48px; margin-bottom: 12px;">💳</div>
+                    <h3 style="font-size: 20px; margin-bottom: 8px;">Complete Your Payment</h3>
+                    <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">
+                        PayPal should have opened in a new tab.<br>
+                        Once you have completed your payment, click below to generate your ticket.
+                    </p>
+                    <button id="verify-payment-btn" class="btn-primary" style="font-size: 16px; padding: 14px 32px; margin-bottom: 12px;">
+                        I Completed My Payment - Generate My Ticket
+                    </button>
+                    <br>
+                    <button id="reopen-paypal-btn" style="background: none; border: none; color: var(--accent); cursor: pointer; font-size: 13px; padding: 8px; text-decoration: underline;">
+                        Re-open PayPal payment page
+                    </button>
+                    <br>
+                    <button id="cancel-purchase-btn" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 12px; padding: 8px; margin-top: 8px;">
+                        Cancel - go back
+                    </button>
+                `;
+                document.getElementById('ticket-step-info').parentNode.appendChild(verifyStep);
+                
+                document.getElementById('reopen-paypal-btn').addEventListener('click', function() {
+                    window.open(PAYPAL_LINK, '_blank');
+                });
+                
+                document.getElementById('cancel-purchase-btn').addEventListener('click', function() {
+                    verifyStep.style.display = 'none';
+                    document.getElementById('ticket-step-info').style.display = 'block';
+                });
+            }
+            
+            verifyStep.style.display = 'block';
+            
+            // Wire up the confirm button with this purchase's details
+            document.getElementById('verify-payment-btn').onclick = function() {
+                verifyStep.style.display = 'none';
+                logDonation(buyer.name, buyer.email, amount, ticketCount, 'paypal');
+                showConfirmation(buyer.name, buyer.email, ticketCount, amount);
+                updateProgress();
+                createConfetti();
+            };
         }
         
         document.getElementById('ticket-1').addEventListener('click', (e) => {
