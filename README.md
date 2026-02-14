@@ -1,17 +1,17 @@
 # CalABA 2026 Conference Raffle
 
-Complete Stripe-integrated raffle ticket system for the CalABA 2026 Conference.
+Complete PayPal-integrated raffle ticket system for the CalABA 2026 Conference.
 
 ## Live Site
 https://calaba-sig-raffle.vercel.app
 
 ## Features
 
-- **Stripe Checkout Integration**: Secure card payments for raffle tickets
+- **PayPal Checkout Integration**: Secure payments via PayPal JavaScript SDK
 - **3 Ticket Packages**: $10 (1 ticket), $20 (3 tickets), $40 (7 tickets)
-- **Automated Ticket Generation**: Unique CALABA-XXXXX format ticket numbers
+- **Automated Ticket Generation**: Unique CALABA-XXXXX format (5 random digits)
 - **Email Confirmations**: Automatic ticket delivery via Resend API
-- **PayPal Fallback**: Alternative payment option
+- **Payment Verification**: Backend verifies PayPal orders before issuing tickets
 - **Admin Dashboard**: Purchase tracking, winner selection, CSV export
 - **Real-time Progress**: Live fundraising progress bar
 - **Centralized Storage**: Vercel KV for purchase data
@@ -19,10 +19,10 @@ https://calaba-sig-raffle.vercel.app
 ## Tech Stack
 
 - **Frontend**: Static HTML/CSS/JavaScript
-- **Backend**: Vercel Serverless Functions
-- **Payment**: Stripe Checkout + PayPal
+- **Backend**: Vercel Serverless Functions (Node.js)
+- **Payment**: PayPal JavaScript SDK (with Stripe as legacy fallback)
 - **Email**: Resend API
-- **Storage**: Vercel KV
+- **Storage**: Vercel KV (Redis-compatible)
 - **Hosting**: Vercel (auto-deploy from GitHub)
 
 ## Setup
@@ -32,17 +32,43 @@ https://calaba-sig-raffle.vercel.app
 Configure these in Vercel Dashboard (Settings > Environment Variables):
 
 ```
-STRIPE_SECRET_KEY=sk_live_xxxxx (get from Stripe Dashboard)
-STRIPE_WEBHOOK_SECRET=whsec_xxxxx (get from Stripe Dashboard after setting up webhook)
-RESEND_API_KEY=re_xxxxx (get from Resend Dashboard)
-ADMIN_TOKEN=your-custom-admin-token
+# PayPal (primary payment method)
+PAYPAL_CLIENT_ID=<from Liz, pending - use "sb" for sandbox testing>
+PAYPAL_SECRET=<from Liz, pending>
+PAYPAL_MODE=sandbox (or "live" for production)
+
+# Email confirmations
+RESEND_API_KEY=re_f4srKc4t_4rjpYf7do2quereTYzd19MkA
+
+# Admin dashboard
+ADMIN_TOKEN=<generate a secure random token>
+
+# Legacy Stripe (optional - can be removed)
+STRIPE_SECRET_KEY=sk_live_xxxxx (optional - Stripe checkout still available as fallback)
+STRIPE_WEBHOOK_SECRET=whsec_xxxxx (optional)
 ```
 
-**Note:** Contact Rob Spain for the actual API keys.
+**Note:** Contact Liz for PayPal credentials. Use sandbox mode until live credentials are available.
 
 Vercel KV variables are auto-configured when you add the KV integration.
 
-### 2. Vercel KV Setup
+### 2. Switching from Sandbox to Live PayPal
+
+**Currently using:** Sandbox mode with test client-id "sb"
+
+**To go live:**
+1. Get live PayPal Client ID and Secret from Liz
+2. Update environment variables in Vercel:
+   - `PAYPAL_CLIENT_ID` = live client ID
+   - `PAYPAL_SECRET` = live secret
+   - `PAYPAL_MODE` = "live"
+3. Update index.html PayPal SDK script tag:
+   - Change `client-id=sb` to `client-id=YOUR_LIVE_CLIENT_ID`
+4. Redeploy (auto-deploy on git push)
+
+**No code changes needed** - just update env vars and the SDK script tag!
+
+### 3. Vercel KV Setup
 
 1. Go to Vercel Dashboard > Storage > Create Database
 2. Select "KV" (Redis-compatible key-value store)
@@ -50,7 +76,7 @@ Vercel KV variables are auto-configured when you add the KV integration.
 4. Connect to your project
 5. Environment variables will be auto-configured
 
-### 3. Stripe Webhook Setup
+### 4. (Optional) Stripe Webhook Setup
 
 1. Go to Stripe Dashboard > Developers > Webhooks
 2. Add endpoint: `https://calaba-sig-raffle.vercel.app/api/stripe-webhook`
@@ -70,32 +96,44 @@ git push origin main
 
 ## API Endpoints
 
-### `/api/create-checkout` (POST)
-Create Stripe Checkout session
+### `/api/confirm-purchase` (POST)
+**Primary endpoint** - Confirm PayPal purchase, verify order, and send confirmation.
 
 **Request:**
 ```json
 {
-  "ticketCount": 7,
+  "name": "John Doe",
+  "email": "john@example.com",
   "amount": 40,
-  "customerName": "John Doe",
-  "customerEmail": "john@example.com"
+  "ticketCount": 7,
+  "ticketNumbers": ["CALABA-12345", "CALABA-67890", ...],
+  "paypalOrderId": "8AB12345CD678901E",
+  "paypalPayerId": "PAYERID123"
 }
 ```
 
 **Response:**
 ```json
 {
-  "sessionId": "cs_xxxxx",
-  "url": "https://checkout.stripe.com/..."
+  "success": true,
+  "verified": true,
+  "purchaseId": "pp_1234567890_abc123",
+  "ticketNumbers": ["CALABA-12345", ...],
+  "paypalOrderId": "8AB12345CD678901E"
 }
 ```
 
-### `/api/stripe-webhook` (POST)
-Webhook handler for Stripe events. Automatically:
-- Generates unique ticket numbers
+**What it does:**
+- Verifies PayPal order is completed via PayPal API
+- Validates payment amount matches ticket price
 - Stores purchase in Vercel KV
-- Sends confirmation email via Resend
+- Sends confirmation email via Resend with ticket numbers
+
+### `/api/create-checkout` (POST)
+**Legacy Stripe endpoint** - Create Stripe Checkout session (optional fallback)
+
+### `/api/stripe-webhook` (POST)
+**Legacy Stripe webhook** - Handles Stripe checkout.session.completed events
 
 ### `/api/purchases` (GET)
 Get purchase data
