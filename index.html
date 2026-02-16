@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_LIVE_PAYPAL_CLIENT_ID&currency=USD"></script>
     <style>
         :root {
             --calaba-blue: #1e3a5f;
@@ -887,6 +887,13 @@
                     </a>
                     <p style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">Use this if the PayPal buttons do not load.</p>
                 </div>
+                <!-- Direct Donation Button -->
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="https://www.paypal.com/donate/?hosted_button_id=YOUR_DONATION_BUTTON_ID_ASK_ROB" target="_blank" class="btn-secondary" style="background: #dcfce7; color: var(--success); border-color: #a7f3d0; display: inline-block; font-size: 14px; padding: 10px 18px;">
+                        💚 Make a Direct Donation
+                    </a>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">Your support helps CalABA continue its mission!</p>
+                </div>
             </div>
 
             <!-- Step 2: Confirmation with generated ticket -->
@@ -941,6 +948,7 @@
     <script>
         // Countdown Timer
         const eventDate = new Date('March 6, 2026 18:00:00 PST').getTime();
+        const PAYPAL_LINK = "https://www.paypal.com/ncp/payment/S2SUQFGT9XSSQ"; // From existing fallback link
         
         function updateCountdown() {
             const now = new Date().getTime();
@@ -1244,6 +1252,20 @@
                         const confirmData = await confirmResponse.json();
                         
                         if (confirmData.success) {
+                            // Store verified donation locally as fallback
+                            const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
+                            donations.push({
+                                timestamp: new Date().toISOString(),
+                                name: buyer.name,
+                                email: buyer.email,
+                                amount: selectedAmount.toFixed(2),
+                                tickets: selectedTicketCount,
+                                method: 'paypal',
+                                id: data.orderID,
+                                verified: true
+                            });
+                            localStorage.setItem('sig_raffle_donations', JSON.stringify(donations));
+
                             // Show confirmation with tickets
                             showConfirmation(buyer.name, buyer.email, selectedTicketCount, selectedAmount, ticketNumbers);
                             updateProgress();
