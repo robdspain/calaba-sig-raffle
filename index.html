@@ -979,13 +979,8 @@
             return { name, email };
         }
         
-        // Donation logging now handled by backend /api/confirm-purchase
-        
-        function generateTicketId() {
-            // Generate 5 random digits (00000-99999)
-            const randomDigits = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
-            return 'CALABA-' + randomDigits;
-        }
+        // Donation logging and ticket generation now handled by backend /api/confirm-purchase
+        // SECURITY: Ticket numbers are ONLY generated server-side after payment verification
         
         function generateTicketImage(name, ticketCount, amount, ticketIds) {
             const canvas = document.getElementById('ticket-canvas');
@@ -1096,72 +1091,8 @@
             document.getElementById('email-error').style.display = 'none';
         }
         
-        function purchaseTickets(amount, ticketCount, note) {
-            const buyer = validateBuyer();
-            if (!buyer) return;
-            
-            // Open PayPal in new tab
-            window.open(PAYPAL_LINK, '_blank');
-            
-            // Show payment verification step instead of generating ticket immediately
-            document.getElementById('ticket-step-info').style.display = 'none';
-            document.getElementById('ticket-step-confirm').style.display = 'none';
-            
-            // Create or show payment verification step
-            let verifyStep = document.getElementById('ticket-step-verify');
-            if (!verifyStep) {
-                verifyStep = document.createElement('div');
-                verifyStep.id = 'ticket-step-verify';
-                verifyStep.style.cssText = 'text-align: center; padding: 20px 0;';
-                verifyStep.innerHTML = `
-                    <div style="font-size: 48px; margin-bottom: 12px;">💳</div>
-                    <h3 style="font-size: 20px; margin-bottom: 8px;">Complete Your Payment</h3>
-                    <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">
-                        PayPal should have opened in a new tab.<br>
-                        Once you have completed your payment, click below to generate your ticket.
-                    </p>
-                    <button id="verify-payment-btn" class="btn-primary" style="font-size: 16px; padding: 14px 32px; margin-bottom: 12px;">
-                        I Completed My Payment - Generate My Ticket
-                    </button>
-                    <br>
-                    <button id="reopen-paypal-btn" style="background: none; border: none; color: var(--accent); cursor: pointer; font-size: 13px; padding: 8px; text-decoration: underline;">
-                        Re-open PayPal payment page
-                    </button>
-                    <br>
-                    <button id="cancel-purchase-btn" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 12px; padding: 8px; margin-top: 8px;">
-                        Cancel - go back
-                    </button>
-                `;
-                document.getElementById('ticket-step-info').parentNode.appendChild(verifyStep);
-                
-                document.getElementById('reopen-paypal-btn').addEventListener('click', function() {
-                    window.open(PAYPAL_LINK, '_blank');
-                });
-                
-                document.getElementById('cancel-purchase-btn').addEventListener('click', function() {
-                    verifyStep.style.display = 'none';
-                    document.getElementById('ticket-step-info').style.display = 'block';
-                });
-            }
-            
-            verifyStep.style.display = 'block';
-            
-            // SECURITY FIX: Do not generate tickets without payment verification
-            // The PayPal Smart Buttons handle this correctly via /api/confirm-purchase
-            document.getElementById('verify-payment-btn').onclick = function() {
-                verifyStep.innerHTML = `
-                    <div style="font-size: 48px; margin-bottom: 12px;">⚠️</div>
-                    <h3 style="font-size: 20px; margin-bottom: 8px; color: #dc2626;">Payment Verification Required</h3>
-                    <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">
-                        For security, tickets can only be generated through the official PayPal checkout buttons above.<br><br>
-                        If you already paid via the external PayPal link, please email <strong>bae.sig.calaba@behaviorschool.com</strong> with your PayPal receipt and we'll send your tickets manually.
-                    </p>
-                    <button onclick="location.reload()" class="btn-secondary" style="font-size: 14px; padding: 10px 18px;">
-                        ← Go Back to Purchase
-                    </button>
-                `;
-            };
-        }
+        // REMOVED: Legacy purchaseTickets function (security vulnerability)
+        // All purchases now go through PayPal Smart Buttons with server-side verification
         
         // Track selected ticket option
         let selectedTicketCount = 7; // Default to best value
@@ -1225,16 +1156,13 @@
                         '<div style="text-align: center; padding: 20px;"><div style="font-size: 24px;">⏳</div><p style="margin-top: 8px; color: var(--text-secondary);">Processing your payment...</p></div>';
                     
                     try {
-                        // Capture the order
+                        // Capture the order (payment is now completed on PayPal's side)
                         const captureResult = await actions.order.capture();
                         
-                        // Generate ticket numbers
-                        const ticketNumbers = [];
-                        for (let i = 0; i < selectedTicketCount; i++) {
-                            ticketNumbers.push(generateTicketId());
-                        }
+                        // SECURITY FIX: Do NOT generate ticket numbers client-side
+                        // Server will generate them after verifying payment
                         
-                        // Send to backend for verification and storage
+                        // Send to backend for verification and ticket generation
                         const confirmResponse = await fetch('/api/confirm-purchase', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -1242,8 +1170,8 @@
                                 name: buyer.name,
                                 email: buyer.email,
                                 amount: selectedAmount,
-                                ticketCount: selectedTicketCount,
-                                ticketNumbers: ticketNumbers,
+                                // ticketCount and ticketNumbers are now determined SERVER-SIDE
+                                // based on verified payment amount from PayPal
                                 paypalOrderId: data.orderID,
                                 paypalPayerId: data.payerID
                             })
@@ -1252,22 +1180,29 @@
                         const confirmData = await confirmResponse.json();
                         
                         if (confirmData.success) {
+                            // Use SERVER-GENERATED ticket numbers (not client-side)
+                            const serverTicketNumbers = confirmData.ticketNumbers;
+                            const serverTicketCount = confirmData.ticketCount;
+                            const serverAmount = confirmData.amount;
+                            
                             // Store verified donation locally as fallback
                             const donations = JSON.parse(localStorage.getItem('sig_raffle_donations') || '[]');
                             donations.push({
                                 timestamp: new Date().toISOString(),
                                 name: buyer.name,
                                 email: buyer.email,
-                                amount: selectedAmount.toFixed(2),
-                                tickets: selectedTicketCount,
+                                amount: serverAmount,
+                                tickets: serverTicketCount,
+                                ticketNumbers: serverTicketNumbers,
                                 method: 'paypal',
                                 id: data.orderID,
+                                purchaseId: confirmData.purchaseId,
                                 verified: true
                             });
                             localStorage.setItem('sig_raffle_donations', JSON.stringify(donations));
 
-                            // Show confirmation with tickets
-                            showConfirmation(buyer.name, buyer.email, selectedTicketCount, selectedAmount, ticketNumbers);
+                            // Show confirmation with SERVER-GENERATED tickets
+                            showConfirmation(buyer.name, buyer.email, serverTicketCount, serverAmount, serverTicketNumbers);
                             updateProgress();
                             createConfetti();
                         } else {
