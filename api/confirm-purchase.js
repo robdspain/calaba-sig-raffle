@@ -8,6 +8,54 @@ const PAYPAL_API = process.env.PAYPAL_MODE === 'live'
   ? 'https://api-m.paypal.com' 
   : 'https://api-m.sandbox.paypal.com';
 
+// Valid price-to-ticket mappings (amount in dollars -> ticket count)
+const VALID_TICKET_PRICES = {
+  10: 1,   // $10 = 1 ticket
+  20: 3,   // $20 = 3 tickets
+  40: 7    // $40 = 7 tickets
+};
+
+// Generate unique ticket number in CALABA-XXXXX format (SERVER-SIDE ONLY)
+function generateTicketNumber() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Avoid confusing characters
+  let result = 'CALABA-';
+  for (let i = 0; i < 5; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+// Generate unique ticket numbers with duplicate checking
+async function generateUniqueTicketNumbers(count) {
+  const tickets = [];
+  const maxAttempts = count * 10;
+  let attempts = 0;
+
+  while (tickets.length < count && attempts < maxAttempts) {
+    const ticket = generateTicketNumber();
+    
+    try {
+      // Check if ticket already exists in KV
+      const existing = await kv.get(`ticket:${ticket}`);
+      if (!existing && !tickets.includes(ticket)) {
+        tickets.push(ticket);
+      }
+    } catch (kvError) {
+      // If KV fails, just check local duplicates
+      if (!tickets.includes(ticket)) {
+        tickets.push(ticket);
+      }
+    }
+    attempts++;
+  }
+
+  if (tickets.length < count) {
+    throw new Error('Failed to generate unique ticket numbers');
+  }
+
+  return tickets;
+}
+
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -26,35 +74,51 @@ export default async function handler(req, res) {
     name, 
     email, 
     amount, 
-    ticketCount, 
-    ticketNumbers, 
     paypalOrderId, 
     paypalPayerId 
   } = req.body;
 
+  // NOTE: ticketCount and ticketNumbers are NO LONGER accepted from client
+  // They are determined server-side based on verified payment amount
+
   // Validate required fields
-  if (!name || !email || !amount || !ticketCount || !ticketNumbers || !paypalOrderId) {
+  if (!name || !email || !amount || !paypalOrderId) {
     return res.status(400).json({ 
       error: 'Missing required fields',
-      required: ['name', 'email', 'amount', 'ticketCount', 'ticketNumbers', 'paypalOrderId']
+      required: ['name', 'email', 'amount', 'paypalOrderId']
     });
   }
 
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Invalid email format' });
+  }
+
   try {
-    // Step 1: Verify PayPal order is actually completed
+    // Step 0: Check for duplicate PayPal order ID (prevent replay attacks)
+    try {
+      const existingOrder = await kv.get(`paypal_order:${paypalOrderId}`);
+      if (existingOrder) {
+        console.error(`Duplicate PayPal order ID attempted: ${paypalOrderId}`);
+        return res.status(400).json({ 
+          error: 'This payment has already been processed',
+          existingPurchaseId: existingOrder
+        });
+      }
+    } catch (kvError) {
+      console.warn('KV lookup failed for duplicate check, proceeding with caution:', kvError.message);
+    }
+
+    // Step 1: Verify PayPal order is COMPLETED (not just APPROVED)
     const paypalClientId = process.env.PAYPAL_CLIENT_ID;
     const paypalSecret = process.env.PAYPAL_SECRET;
 
     if (!paypalClientId || !paypalSecret) {
-      console.error('PayPal credentials not configured');
-      // Store purchase anyway but mark as unverified
-      const purchaseId = await storePurchase(name, email, amount, ticketCount, ticketNumbers, paypalOrderId, paypalPayerId, false);
-      return res.status(200).json({
-        success: true,
-        verified: false,
-        message: 'Purchase stored but PayPal verification unavailable',
-        purchaseId,
-        ticketNumbers
+      console.error('PayPal credentials not configured - REJECTING PURCHASE');
+      return res.status(500).json({
+        error: 'Payment verification unavailable. Please contact support.',
+        code: 'PAYPAL_CONFIG_ERROR'
       });
     }
 
@@ -71,13 +135,14 @@ export default async function handler(req, res) {
     });
 
     if (!authResponse.ok) {
-      throw new Error('PayPal authentication failed');
+      console.error('PayPal auth failed:', await authResponse.text());
+      return res.status(500).json({ error: 'Payment verification failed' });
     }
 
     const authData = await authResponse.json();
     const accessToken = authData.access_token;
 
-    // Verify order details
+    // Verify order details from PayPal
     const orderResponse = await fetch(`${PAYPAL_API}/v2/checkout/orders/${paypalOrderId}`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -86,38 +151,65 @@ export default async function handler(req, res) {
     });
 
     if (!orderResponse.ok) {
-      throw new Error('PayPal order verification failed');
+      console.error('PayPal order lookup failed:', await orderResponse.text());
+      return res.status(400).json({ error: 'Invalid PayPal order ID' });
     }
 
     const orderData = await orderResponse.json();
 
-    // Check order status
-    if (orderData.status !== 'COMPLETED' && orderData.status !== 'APPROVED') {
+    // CRITICAL: Only accept COMPLETED status (payment captured)
+    // APPROVED means user approved but payment not captured yet
+    if (orderData.status !== 'COMPLETED') {
+      console.error(`PayPal order not completed. Status: ${orderData.status}, Order: ${paypalOrderId}`);
       return res.status(400).json({
-        error: 'PayPal order not completed',
-        status: orderData.status
+        error: 'Payment not completed',
+        status: orderData.status,
+        message: 'Please complete your payment in PayPal before continuing.'
       });
     }
 
-    // Verify amount matches
+    // Get the actual paid amount from PayPal (source of truth)
     const paypalAmount = parseFloat(orderData.purchase_units[0].amount.value);
-    const expectedAmount = parseFloat(amount);
+    const roundedAmount = Math.round(paypalAmount);
+
+    // Step 2: Determine ticket count based on VERIFIED payment amount (not client input)
+    const ticketCount = VALID_TICKET_PRICES[roundedAmount];
     
-    if (Math.abs(paypalAmount - expectedAmount) > 0.01) {
-      console.error(`Amount mismatch: expected ${expectedAmount}, got ${paypalAmount}`);
+    if (!ticketCount) {
+      console.error(`Invalid payment amount: $${paypalAmount} (rounded: $${roundedAmount})`);
       return res.status(400).json({
-        error: 'Amount mismatch',
-        expected: expectedAmount,
-        received: paypalAmount
+        error: 'Invalid payment amount',
+        received: paypalAmount,
+        validAmounts: Object.keys(VALID_TICKET_PRICES).map(a => `$${a}`)
       });
     }
 
-    // Step 2: Store purchase in Vercel KV
-    const purchaseId = await storePurchase(name, email, amount, ticketCount, ticketNumbers, paypalOrderId, paypalPayerId, true);
+    console.log(`Verified PayPal payment: $${paypalAmount} = ${ticketCount} tickets for ${email}`);
 
-    // Step 3: Send confirmation email
+    // Step 3: Generate ticket numbers SERVER-SIDE
+    const ticketNumbers = await generateUniqueTicketNumbers(ticketCount);
+
+    // Step 4: Store purchase in Vercel KV
+    const purchaseId = await storePurchase(
+      name, 
+      email, 
+      roundedAmount, 
+      ticketCount, 
+      ticketNumbers, 
+      paypalOrderId, 
+      paypalPayerId
+    );
+
+    // Step 5: Mark PayPal order as processed (prevent replay)
     try {
-      await sendConfirmationEmail(name, email, ticketCount, amount, ticketNumbers);
+      await kv.set(`paypal_order:${paypalOrderId}`, purchaseId);
+    } catch (kvError) {
+      console.warn('Failed to mark order as processed:', kvError.message);
+    }
+
+    // Step 6: Send confirmation email
+    try {
+      await sendConfirmationEmail(name, email, ticketCount, roundedAmount, ticketNumbers);
     } catch (emailError) {
       console.error('Email send failed:', emailError);
       // Don't fail the purchase if email fails
@@ -127,7 +219,9 @@ export default async function handler(req, res) {
       success: true,
       verified: true,
       purchaseId,
-      ticketNumbers,
+      ticketNumbers,  // Server-generated tickets returned to client
+      ticketCount,    // Actual ticket count based on payment
+      amount: roundedAmount,
       paypalOrderId
     });
 
@@ -140,7 +234,7 @@ export default async function handler(req, res) {
   }
 }
 
-async function storePurchase(name, email, amount, ticketCount, ticketNumbers, paypalOrderId, paypalPayerId, verified) {
+async function storePurchase(name, email, amount, ticketCount, ticketNumbers, paypalOrderId, paypalPayerId) {
   const purchaseId = `pp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const timestamp = new Date().toISOString();
 
@@ -154,7 +248,7 @@ async function storePurchase(name, email, amount, ticketCount, ticketNumbers, pa
     paypalOrderId,
     paypalPayerId: paypalPayerId || null,
     timestamp,
-    verified,
+    verified: true,
     source: 'paypal'
   };
 
@@ -165,11 +259,16 @@ async function storePurchase(name, email, amount, ticketCount, ticketNumbers, pa
     // Add to purchases list
     await kv.lpush('purchases:list', purchaseId);
 
-    console.log(`Purchase stored: ${purchaseId}`);
+    // Store each ticket number mapping to purchase
+    for (const ticketNum of ticketNumbers) {
+      await kv.set(`ticket:${ticketNum}`, purchaseId);
+    }
+
+    console.log(`Purchase stored: ${purchaseId}, tickets: ${ticketNumbers.join(', ')}`);
     return purchaseId;
   } catch (error) {
     console.error('KV storage failed:', error);
-    // Fallback: just log it
+    // Log purchase data even if KV fails
     console.log('Purchase data (KV unavailable):', JSON.stringify(purchase));
     return purchaseId;
   }

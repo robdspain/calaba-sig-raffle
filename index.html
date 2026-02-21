@@ -881,18 +881,11 @@
                 <!-- PayPal Smart Buttons Container -->
                 <div id="paypal-button-container" style="margin-top: 16px;"></div>
                 <p id="paypal-error" style="display: none; color: #ef4444; font-size: 13px; margin-top: 8px; text-align: center;"></p>
+                <!-- Fallback removed for security - all purchases must go through verified PayPal buttons -->
                 <div style="margin-top: 14px; text-align: center;">
-                    <a id="paypal-fallback" href="https://www.paypal.com/ncp/payment/S2SUQFGT9XSSQ" target="_blank" class="btn-secondary" style="display: inline-block; font-size: 14px; padding: 10px 18px;">
-                        Pay with PayPal (fallback)
-                    </a>
-                    <p style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">Use this if the PayPal buttons do not load.</p>
-                </div>
-                <!-- Direct Donation Button -->
-                <div style="margin-top: 20px; text-align: center;">
-                    <a href="https://paypal.me/YOUR_PAYPAL_USERNAME_ASK_ROB" target="_blank" class="btn-secondary" style="background: #dcfce7; color: var(--success); border-color: #a7f3d0; display: inline-block; font-size: 14px; padding: 10px 18px;">
-                        💚 Make a Direct Donation
-                    </a>
-                    <p style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">Your support helps CalABA continue its mission!</p>
+                    <p style="font-size: 12px; color: var(--text-secondary);">
+                        PayPal buttons not loading? Try refreshing the page or contact <a href="mailto:bae.sig.calaba@behaviorschool.com" style="color: var(--calaba-teal);">bae.sig.calaba@behaviorschool.com</a>
+                    </p>
                 </div>
             </div>
 
@@ -1153,13 +1146,20 @@
             
             verifyStep.style.display = 'block';
             
-            // Wire up the confirm button with this purchase's details
+            // SECURITY FIX: Do not generate tickets without payment verification
+            // The PayPal Smart Buttons handle this correctly via /api/confirm-purchase
             document.getElementById('verify-payment-btn').onclick = function() {
-                verifyStep.style.display = 'none';
-                logDonation(buyer.name, buyer.email, amount, ticketCount, 'paypal');
-                showConfirmation(buyer.name, buyer.email, ticketCount, amount);
-                updateProgress();
-                createConfetti();
+                verifyStep.innerHTML = `
+                    <div style="font-size: 48px; margin-bottom: 12px;">⚠️</div>
+                    <h3 style="font-size: 20px; margin-bottom: 8px; color: #dc2626;">Payment Verification Required</h3>
+                    <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">
+                        For security, tickets can only be generated through the official PayPal checkout buttons above.<br><br>
+                        If you already paid via the external PayPal link, please email <strong>bae.sig.calaba@behaviorschool.com</strong> with your PayPal receipt and we'll send your tickets manually.
+                    </p>
+                    <button onclick="location.reload()" class="btn-secondary" style="font-size: 14px; padding: 10px 18px;">
+                        ← Go Back to Purchase
+                    </button>
+                `;
             };
         }
         
