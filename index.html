@@ -701,7 +701,7 @@
     </div>
 
     <div class="container">
-        <div class="progress-section">
+        <div class="progress-section" id="progress-section" style="display: none;">
             <p class="progress-label">
                 Help Support CalABA 🎉
             </p>
@@ -1334,8 +1334,10 @@
                     const ticketCount = data.summary.totalTickets;
                     const pct = Math.min(100, Math.round((total / GOAL) * 100));
                     
-                    document.getElementById('progress-fill').style.width = pct + '%';
-                    if (total > 0) {
+                    // Only show progress bar at 33% or higher
+                    if (pct >= 33) {
+                        document.getElementById('progress-section').style.display = 'block';
+                        document.getElementById('progress-fill').style.width = pct + '%';
                         document.getElementById('progress-text').innerHTML = 
                             `<strong>$${total.toFixed(0)}</strong> raised of $${GOAL} goal (${pct}%) -- ${ticketCount} ticket${ticketCount !== 1 ? 's' : ''} sold`;
                     }
@@ -1350,8 +1352,10 @@
                     return sum + (isNaN(amt) ? 0 : amt);
                 }, 0);
                 const pct = Math.min(100, Math.round((total / GOAL) * 100));
-                document.getElementById('progress-fill').style.width = pct + '%';
-                if (total > 0) {
+                // Only show progress bar at 33% or higher
+                if (pct >= 33) {
+                    document.getElementById('progress-section').style.display = 'block';
+                    document.getElementById('progress-fill').style.width = pct + '%';
                     document.getElementById('progress-text').innerHTML = 
                         `<strong>$${total}</strong> raised of $${GOAL} goal (${pct}%)`;
                 }
