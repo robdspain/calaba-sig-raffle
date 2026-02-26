@@ -362,7 +362,7 @@ export default function Home() {
               <img src="/biba-logo.png" alt="BIBA" />
             </div>
           </div>
-          <p>A collaborative fundraiser benefiting CalABA</p>
+          <p>v1.1 | A collaborative fundraiser benefiting CalABA</p>
           <p>Questions: <a href="mailto:california.bae.sig@gmail.com">california.bae.sig@gmail.com</a></p>
         </footer>
       </div>
