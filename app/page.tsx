@@ -326,16 +326,31 @@ export default function Home() {
             ))}
           </div>
 
-          <div id="paypal-button-container" className="paypal-container" />
-          
-          <a 
-            href="https://www.paypal.com/ncp/payment/S2SUQFGT9XSSQ" 
-            target="_blank" 
+          <a
+            href="https://www.paypal.com/ncp/payment/S2SUQFGT9XSSQ"
+            target="_blank"
             rel="noopener noreferrer"
-            className="donation-link"
+            className="buy-tickets-btn"
+            style={{
+              display: "block",
+              width: "100%",
+              background: "#0070ba",
+              color: "white",
+              textAlign: "center",
+              padding: "16px",
+              borderRadius: "10px",
+              fontWeight: "700",
+              fontSize: "18px",
+              textDecoration: "none",
+              marginTop: "16px",
+              boxShadow: "0 4px 14px rgba(0,112,186,0.35)"
+            }}
           >
-            💚 Make a Direct Donation
+            Buy Tickets via PayPal →
           </a>
+          <p style={{ textAlign: "center", fontSize: "13px", color: "#888", marginTop: "8px" }}>
+            Secure checkout via PayPal · $10 / ticket · $25 for 3 · $40 for 7
+          </p>
         </section>
 
         {/* Must Be Present */}
